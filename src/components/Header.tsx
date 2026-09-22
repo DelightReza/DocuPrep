@@ -44,7 +44,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/95 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/95 transition-colors">
+    <header className="site-header sticky top-0 z-40 w-full border-b backdrop-blur-md transition-colors">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand & Tagline */}
         <div className="flex items-center gap-3">
@@ -53,13 +53,13 @@ export const Header: React.FC<HeaderProps> = ({
             className="flex items-center gap-2.5 text-left focus:outline-none group"
             id="brand-logo-btn"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-white shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0f766e] text-white shadow-md shadow-teal-900/20 group-hover:scale-105 transition-transform">
               <FileCheck2 className="h-5 w-5" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                  Docu<span className="text-indigo-600 dark:text-indigo-400">Prep</span>
+                <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Docu<span className="text-[#e76f51]">Prep</span>
                 </span>
                 <span className="hidden sm:inline-flex items-center rounded-md bg-indigo-50 dark:bg-indigo-950/60 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-700 dark:text-indigo-300 border border-indigo-200/50 dark:border-indigo-800/50">
                   v2.5

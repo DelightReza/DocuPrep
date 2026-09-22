@@ -37,28 +37,28 @@ export const HomePage: React.FC<HomePageProps> = ({
   return (
     <div className="flex flex-col min-h-screen animate-fade-in">
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-slate-200/80 bg-gradient-to-b from-indigo-50/40 via-white to-white dark:border-slate-800/80 dark:from-slate-900/40 dark:via-slate-950 dark:to-slate-950 py-16 sm:py-24">
+      <section className="hero-grid relative overflow-hidden border-b section-rule bg-[#f5f3ee] dark:bg-[#101917] py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center relative z-10">
           {/* Eyebrow / Privacy Pill */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200/80 bg-white/80 dark:bg-slate-900/80 dark:border-indigo-900/60 px-3.5 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 shadow-sm backdrop-blur-sm mb-6">
+          <div className="hero-kicker inline-flex items-center gap-2 rounded-full border px-3.5 py-1 text-xs font-semibold shadow-sm backdrop-blur-sm mb-6">
             <ShieldCheck className="h-4 w-4 text-emerald-500" />
-            <span>100% Client-Side In-Browser Processing • Zero Server Uploads</span>
+            <span>Private by design · nothing leaves your browser</span>
           </div>
 
           {/* Main Title & Tagline */}
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white max-w-4xl mx-auto leading-tight">
-            Prepare Any Photo, Signature, Thumb Impression or PDF
+          <h1 className="hero-title mx-auto font-bold text-slate-900 dark:text-white">
+            Documents, <em>ready.</em>
           </h1>
 
-          <p className="mt-4 sm:mt-6 text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Resize, crop, compress, convert and prepare documents for applications, exams, passports, visas and government submissions — directly in your browser.
+          <p className="mt-6 sm:mt-8 text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-xl mx-auto leading-relaxed">
+            The calm, exact way to resize photos, sign forms, tune file size, and turn scattered pages into submission-ready documents.
           </p>
 
           {/* Primary Action Buttons */}
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             <button
               onClick={() => onSelectTool('editor')}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 text-sm font-bold shadow-lg shadow-indigo-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all"
+              className="studio-button w-full sm:w-auto flex items-center justify-center gap-2 rounded-2xl text-white px-8 py-3.5 text-sm font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
               id="hero-start-btn"
             >
               <Upload className="h-4 w-4" />
@@ -67,7 +67,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
             <button
               onClick={() => onOpenPdfSuite()}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 px-7 py-3.5 text-sm font-bold shadow-sm transition"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white/75 dark:bg-slate-900/75 text-slate-800 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-800 px-7 py-3.5 text-sm font-bold shadow-sm transition"
             >
               <Files className="h-4 w-4 text-indigo-500" />
               <span>Explore PDF Suite</span>
@@ -75,7 +75,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
             <button
               onClick={onOpenSignaturePad}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 px-6 py-3.5 text-sm font-bold shadow-sm transition"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white/75 dark:bg-slate-900/75 text-slate-800 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-800 px-6 py-3.5 text-sm font-bold shadow-sm transition"
             >
               <PenTool className="h-4 w-4 text-blue-500" />
               <span>Draw Signature</span>
@@ -83,7 +83,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Quick Metrics Bar */}
-          <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto pt-8 border-t border-slate-200/60 dark:border-slate-800/60 text-left">
+          <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto pt-8 border-t section-rule text-left">
             <div>
               <div className="text-xl font-black text-slate-900 dark:text-white">20+ Tools</div>
               <div className="text-xs text-slate-500">Passports, Visas, PDFs & Forms</div>
@@ -105,7 +105,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       {/* Popular Official Presets Ribbon */}
-      <section className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6">
+      <section className="section-rule border-b paper-surface py-6">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">

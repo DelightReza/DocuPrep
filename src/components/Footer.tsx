@@ -13,7 +13,7 @@ export const Footer: React.FC<FooterProps> = ({
   onOpenAbout,
 }) => {
   return (
-    <footer className="w-full border-t border-slate-200/80 bg-slate-50 dark:border-slate-800/80 dark:bg-slate-950 transition-colors">
+    <footer className="w-full border-t section-rule bg-[var(--paper)] transition-colors">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4 lg:grid-cols-5">
           {/* Brand & Privacy Column */}
