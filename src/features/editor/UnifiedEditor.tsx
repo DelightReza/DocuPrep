@@ -212,7 +212,7 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
     setHeightVal(preset.height);
     setDpi(preset.dpi);
     setOutputFormat(preset.format);
-    setTargetMaxKb(preset.maxKb || null);
+    setTargetMaxKb(null);
 
     // Fixed aspect ratio cropping strictly according to selected preset!
     const presetRatio = preset.width / preset.height;
@@ -1529,7 +1529,7 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
                   .filter((p) => p.category === 'passport')
                   .map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.name} ({p.width}×{p.height} {p.unit}{p.maxKb ? ` • <${p.maxKb}KB` : ''})
+                      {p.name} ({p.width}×{p.height} {p.unit})
                     </option>
                   ))}
               </optgroup>
@@ -1539,7 +1539,7 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
                   .filter((p) => p.category === 'application' || p.category === 'social')
                   .map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.name} ({p.width}×{p.height} {p.unit}{p.maxKb ? ` • <${p.maxKb}KB` : ''})
+                      {p.name} ({p.width}×{p.height} {p.unit})
                     </option>
                   ))}
               </optgroup>
@@ -1550,7 +1550,7 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
                     .filter((p) => p.category === 'custom' && p.id !== 'original')
                     .map((p) => (
                       <option key={p.id} value={p.id}>
-                        {p.name} ({p.width}×{p.height} {p.unit}{p.maxKb ? ` • <${p.maxKb}KB` : ''})
+                        {p.name} ({p.width}×{p.height} {p.unit})
                       </option>
                     ))}
                 </optgroup>
@@ -1748,8 +1748,6 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
               <div className="relative flex-1">
                 <input
                   type="number"
-                  min="5"
-                  max="50000"
                   step="any"
                   placeholder="e.g. 50 (Leave blank for Auto)"
                   value={targetMaxKb ?? ''}
@@ -1783,37 +1781,6 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
                   Auto Quality
                 </span>
               )}
-            </div>
-
-            {/* Quick Target Size Chips */}
-            <div>
-              <div className="flex items-center justify-between text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1.5">
-                <span>Quick Target Size:</span>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {[
-                  { label: '< 20 KB', kb: 20 },
-                  { label: '< 50 KB', kb: 50 },
-                  { label: '< 100 KB', kb: 100 },
-                  { label: '< 200 KB', kb: 200 },
-                  { label: '< 300 KB', kb: 300 },
-                  { label: '< 500 KB', kb: 500 },
-                  { label: '< 1 MB', kb: 1024 },
-                ].map((item) => (
-                  <button
-                    key={item.kb}
-                    type="button"
-                    onClick={() => setTargetMaxKb(item.kb)}
-                    className={`px-2.5 py-1 rounded-lg border text-[11px] font-medium transition ${
-                      targetMaxKb === item.kb
-                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 font-semibold'
-                        : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
             </div>
 
             {/* JPEG Quality Slider (Visible when in Auto quality mode without fixed target KB) */}

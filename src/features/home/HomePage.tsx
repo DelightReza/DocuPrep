@@ -138,7 +138,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   </span>
                 </div>
                 <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  {p.width}x{p.height} {p.unit} • {p.dpi} DPI {p.maxKb ? `• <${p.maxKb}KB` : ''}
+                  {p.width}x{p.height} {p.unit} • {p.dpi} DPI
                 </span>
                 {p.countryOrOrg && (
                   <span className="text-[10px] font-medium text-indigo-600 dark:text-indigo-400 mt-1">

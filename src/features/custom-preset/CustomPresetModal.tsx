@@ -22,8 +22,6 @@ export const CustomPresetModal: React.FC<CustomPresetModalProps> = ({
   const [unit, setUnit] = useState<UnitType>('cm');
   const [dpi, setDpi] = useState<number>(200);
   const [format, setFormat] = useState<OutputFormat>('jpeg');
-  const [maxKb, setMaxKb] = useState<string>('50');
-  const [minKb, setMinKb] = useState<string>('20');
   const [bgType, setBgType] = useState<'white' | 'light' | 'transparent' | 'any'>('white');
 
   if (!isOpen) return null;
@@ -42,8 +40,6 @@ export const CustomPresetModal: React.FC<CustomPresetModalProps> = ({
       unit,
       dpi: Number(dpi),
       format,
-      maxKb: maxKb ? parseInt(maxKb, 10) : undefined,
-      minKb: minKb ? parseInt(minKb, 10) : undefined,
       bgType,
       bgColor: bgType === 'white' ? '#ffffff' : bgType === 'transparent' ? 'transparent' : '#f8fafc',
     };
@@ -109,7 +105,7 @@ export const CustomPresetModal: React.FC<CustomPresetModalProps> = ({
                         {p.name}
                       </div>
                       <div className="text-[11px] text-slate-500">
-                        {p.width}x{p.height} {p.unit} • {p.dpi} DPI {p.maxKb ? `• <${p.maxKb}KB` : ''}
+                        {p.width}x{p.height} {p.unit} • {p.dpi} DPI
                       </div>
                     </div>
                     <button
@@ -223,18 +219,6 @@ export const CustomPresetModal: React.FC<CustomPresetModalProps> = ({
                 </select>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                  Max Size (KB)
-                </label>
-                <input
-                  type="number"
-                  placeholder="e.g. 50"
-                  value={maxKb}
-                  onChange={(e) => setMaxKb(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                />
-              </div>
             </div>
 
             <div className="pt-2 flex justify-end gap-2">
