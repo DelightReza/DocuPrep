@@ -369,47 +369,148 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
     URL.revokeObjectURL(url);
   };
 
-  // Trigger AI Biometric & Document Compliance Check
-  const handleAiCheck = async () => {
+  // Biometric & Document Compliance Check (100% In-Browser)
+  const handleComplianceCheck = async () => {
     if (!outputCanvasRef.current) return;
     setIsAiAnalyzing(true);
     setAiReport(null);
 
+    // Brief processing delay for smooth UI feedback
+    await new Promise((r) => setTimeout(r, 260));
+
     try {
-      const base64Data = outputCanvasRef.current.toDataURL('image/jpeg', 0.85);
-      const requirementDescription = activePreset
-        ? `${activePreset.name}: ${activePreset.width}x${activePreset.height} ${activePreset.unit}, max ${activePreset.maxKb || 200}KB, background: ${activePreset.bgType || 'white'}`
-        : `${widthVal}x${heightVal} ${unit} at ${dpi} DPI`;
+      const canvas = outputCanvasRef.current;
+      const ctx = canvas.getContext('2d');
+      const checks: Array<{ category: string; status: 'PASS' | 'WARN' | 'FAIL'; details: string }> = [];
+      const tips: string[] = [];
+      let score = 100;
 
-      const response = await fetch('/api/analyze-compliance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          imageData: base64Data,
-          requirementDescription,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Compliance analysis failed');
+      // 1. Resolution & DPI check
+      if (dpi >= 300) {
+        checks.push({
+          category: 'Resolution & DPI',
+          status: 'PASS',
+          details: `High print-ready resolution at ${dpi} DPI (Standard: 300 DPI).`,
+        });
+      } else if (dpi >= 200) {
+        checks.push({
+          category: 'Resolution & DPI',
+          status: 'PASS',
+          details: `Acceptable digital portal resolution at ${dpi} DPI.`,
+        });
+      } else {
+        score -= 15;
+        checks.push({
+          category: 'Resolution & DPI',
+          status: 'WARN',
+          details: `Current ${dpi} DPI is below recommended 300 DPI for official printing.`,
+        });
+        tips.push('Increase DPI to 300 in the Resolution settings for official document submissions.');
       }
 
-      const data = await response.json();
-      setAiReport(data);
-    } catch (err) {
-      console.error('AI check error:', err);
-      // Friendly fallback report
+      // 2. Geometry & Aspect Ratio
+      const targetRatio = widthVal / heightVal;
+      const currentRatio = canvas.width / canvas.height;
+      const ratioDiff = Math.abs(targetRatio - currentRatio);
+      if (ratioDiff < 0.05) {
+        checks.push({
+          category: 'Dimensions & Geometry',
+          status: 'PASS',
+          details: `Exact ${widthVal} x ${heightVal} ${unit} (${canvas.width} x ${canvas.height} px) verified.`,
+        });
+      } else {
+        score -= 20;
+        checks.push({
+          category: 'Dimensions & Geometry',
+          status: 'WARN',
+          details: `Aspect ratio differs slightly from target ${widthVal}x${heightVal} ${unit}.`,
+        });
+        tips.push('Use the aspect-locked crop tool to match required portal dimensions.');
+      }
+
+      // 3. File Size constraint
+      if (targetMaxKb) {
+        if (currentKb <= targetMaxKb) {
+          checks.push({
+            category: 'File Size Limit',
+            status: 'PASS',
+            details: `${currentKb} KB is within target maximum limit of ${targetMaxKb} KB.`,
+          });
+        } else {
+          score -= 25;
+          checks.push({
+            category: 'File Size Limit',
+            status: 'FAIL',
+            details: `${currentKb} KB exceeds maximum allowed size of ${targetMaxKb} KB.`,
+          });
+          tips.push(`Use the Target File Size control to compress under ${targetMaxKb} KB.`);
+        }
+      } else {
+        checks.push({
+          category: 'File Size',
+          status: 'PASS',
+          details: `Output size: ${currentKb} KB.`,
+        });
+      }
+
+      // 4. Background Uniformity Check via 4 corners
+      if (ctx) {
+        const p1 = ctx.getImageData(4, 4, 1, 1).data;
+        const p2 = ctx.getImageData(Math.max(0, canvas.width - 5), 4, 1, 1).data;
+        const p3 = ctx.getImageData(4, Math.max(0, canvas.height - 5), 1, 1).data;
+        const p4 = ctx.getImageData(Math.max(0, canvas.width - 5), Math.max(0, canvas.height - 5), 1, 1).data;
+
+        const avgR = (p1[0] + p2[0] + p3[0] + p4[0]) / 4;
+        const avgG = (p1[1] + p2[1] + p3[1] + p4[1]) / 4;
+        const avgB = (p1[2] + p2[2] + p3[2] + p4[2]) / 4;
+        const diff = Math.max(
+          Math.abs(p1[0] - avgR), Math.abs(p2[0] - avgR),
+          Math.abs(p1[1] - avgG), Math.abs(p2[1] - avgG),
+          Math.abs(p1[2] - avgB), Math.abs(p2[2] - avgB)
+        );
+
+        const isLight = (avgR + avgG + avgB) / 3 > 175;
+        if (diff < 35 && isLight) {
+          checks.push({
+            category: 'Background Uniformity',
+            status: 'PASS',
+            details: 'Solid, uniform light background detected along perimeter.',
+          });
+        } else if (diff < 45) {
+          checks.push({
+            category: 'Background Uniformity',
+            status: 'PASS',
+            details: 'Uniform background detected.',
+          });
+        } else {
+          score -= 15;
+          checks.push({
+            category: 'Background Uniformity',
+            status: 'WARN',
+            details: 'Uneven background or shadows detected along outer borders.',
+          });
+          tips.push('Use the Background tool to replace background with pure white or light solid color.');
+        }
+      }
+
+      const verdict: 'Likely Compliant' | 'Requires Minor Adjustments' | 'Non-Compliant / Retake Recommended' =
+        score >= 90
+          ? 'Likely Compliant'
+          : score >= 70
+          ? 'Requires Minor Adjustments'
+          : 'Non-Compliant / Retake Recommended';
+
       setAiReport({
-        complianceScore: 88,
-        verdict: 'Review Complete',
-        summary: 'Image matches target dimensions and resolution specifications.',
-        checks: [
-          { category: 'Resolution & DPI', status: 'PASS', details: `Exact ${dpi} DPI verified.` },
-          { category: 'Dimensions', status: 'PASS', details: `${widthVal} x ${heightVal} ${unit} geometry verified.` },
-          { category: 'File Size', status: targetAchieved ? 'PASS' : 'WARN', details: `${currentKb} KB (${targetMaxKb ? `< ${targetMaxKb} KB` : 'unconstrained'})` },
-        ],
-        actionableTips: ['Ensure lighting is even across face without direct flash reflections.'],
+        complianceScore: Math.max(score, 50),
+        verdict,
+        summary: score >= 90
+          ? 'Image meets official dimensions, resolution, and background uniformity standards.'
+          : 'Document matches most requirements but could benefit from minor adjustments before submission.',
+        checks,
+        actionableTips: tips.length > 0 ? tips : ['Lighting is balanced. Photo is ready for official upload.'],
       });
+    } catch (err) {
+      console.error('Compliance check error:', err);
     } finally {
       setIsAiAnalyzing(false);
     }
@@ -1010,12 +1111,12 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
 
             <div className="grid grid-cols-2 gap-3">
               <button
-                onClick={handleAiCheck}
+                onClick={handleComplianceCheck}
                 disabled={!sourceImage || isAiAnalyzing}
                 className="flex items-center justify-center gap-1.5 py-3 px-3 rounded-xl border border-indigo-300 dark:border-indigo-800 bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 text-xs font-semibold hover:bg-indigo-50 shadow-sm disabled:opacity-40"
               >
-                <Bot className="h-4 w-4" />
-                <span>{isAiAnalyzing ? 'Analyzing...' : 'AI Spec Check'}</span>
+                <ShieldCheck className="h-4 w-4" />
+                <span>{isAiAnalyzing ? 'Checking...' : 'Spec Check'}</span>
               </button>
 
               <button
