@@ -28,6 +28,19 @@ function canvasToBlobAsync(
   });
 }
 
+function scaleCanvas(canvas: HTMLCanvasElement, scale: number): HTMLCanvasElement {
+  const scaledCanvas = document.createElement('canvas');
+  scaledCanvas.width = Math.max(1, Math.round(canvas.width * scale));
+  scaledCanvas.height = Math.max(1, Math.round(canvas.height * scale));
+  const context = scaledCanvas.getContext('2d');
+  if (!context) return canvas;
+
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = 'high';
+  context.drawImage(canvas, 0, 0, scaledCanvas.width, scaledCanvas.height);
+  return scaledCanvas;
+}
+
 export function formatToMimeType(format: OutputFormat): string {
   switch (format) {
     case 'png':
@@ -78,18 +91,44 @@ export async function compressCanvas(
   let bestBlob: Blob | null = null;
   let bestQuality = normalizedInitialQuality;
   let bestSizeKb = 0;
+  const preferredTargetKb = targetMaxKb * 0.94;
 
   // First check at high quality
   const testHighBlob = await canvasToBlobAsync(canvas, mimeType, high);
   const testHighKb = testHighBlob.size / 1024;
-  if (testHighKb <= targetMaxKb) {
+  if (testHighKb < preferredTargetKb) {
+    bestBlob = testHighBlob;
+    bestQuality = high;
+    bestSizeKb = testHighKb;
+
+    let lowScale = 1;
+    let highScale = Math.min(2, Math.max(1.05, Math.sqrt(preferredTargetKb / testHighKb) * 1.2));
+    for (let step = 0; step < 8; step++) {
+      const scale = (lowScale + highScale) / 2;
+      const scaledCanvas = scaleCanvas(canvas, scale);
+      const scaledBlob = await canvasToBlobAsync(scaledCanvas, mimeType, high);
+      const scaledKb = scaledBlob.size / 1024;
+
+      if (scaledKb <= targetMaxKb) {
+        if (Math.abs(scaledKb - preferredTargetKb) < Math.abs(bestSizeKb - preferredTargetKb)) {
+          bestBlob = scaledBlob;
+          bestSizeKb = scaledKb;
+        }
+        lowScale = scale;
+      } else {
+        highScale = scale;
+      }
+    }
+
     return {
-      blob: testHighBlob,
-      sizeKb: Number(testHighKb.toFixed(1)),
+      blob: bestBlob,
+      sizeKb: Number(bestSizeKb.toFixed(1)),
       qualityUsed: Math.round(high * 100),
       targetAchieved: true,
     };
   }
+
+  const searchTargetKb = Math.min(preferredTargetKb, targetMaxKb);
 
   // Iterate up to 7 steps of binary search
   for (let step = 0; step < 7; step++) {
@@ -97,7 +136,7 @@ export async function compressCanvas(
     const currentBlob = await canvasToBlobAsync(canvas, mimeType, mid);
     const currentKb = currentBlob.size / 1024;
 
-    if (currentKb <= targetMaxKb) {
+    if (currentKb <= searchTargetKb) {
       bestBlob = currentBlob;
       bestQuality = mid;
       bestSizeKb = currentKb;
