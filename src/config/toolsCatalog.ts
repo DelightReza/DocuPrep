@@ -1,0 +1,227 @@
+import { ToolId, ToolCategory } from '../types';
+
+export interface ToolItem {
+  id: ToolId;
+  name: string;
+  category: ToolCategory;
+  tagline: string;
+  description: string;
+  badge?: string;
+  popular?: boolean;
+  acceptTypes: string;
+  defaultPresetId?: string;
+  iconName: string;
+}
+
+export const TOOLS_CATALOG: ToolItem[] = [
+  // --- IMAGE TOOLS ---
+  {
+    id: 'resize',
+    name: 'Resize Image',
+    category: 'image',
+    tagline: 'Resize by exact pixels, mm, cm, or inches with aspect lock',
+    description: 'Change image dimensions accurately with high-quality resampling and DPI preservation.',
+    acceptTypes: 'image/*',
+    popular: true,
+    iconName: 'Maximize2',
+  },
+  {
+    id: 'crop',
+    name: 'Crop Image',
+    category: 'image',
+    tagline: 'Precision crop with standard application aspect ratios',
+    description: 'Crop to 1:1, 3:4, 35:45, 2:3, or custom freeform bounding boxes.',
+    acceptTypes: 'image/*',
+    iconName: 'Crop',
+  },
+  {
+    id: 'compress',
+    name: 'Compress to Target KB',
+    category: 'image',
+    tagline: 'Binary search compression: Under 20KB, 50KB, 100KB, 200KB',
+    description: 'Automatically hit government portal file size limits without unnecessary blur or pixelation.',
+    badge: 'Popular',
+    acceptTypes: 'image/*',
+    popular: true,
+    iconName: 'FileArchive',
+  },
+  {
+    id: 'convert',
+    name: 'Convert Format',
+    category: 'image',
+    tagline: 'Convert between JPEG, PNG, and modern WebP formats',
+    description: 'Instantly convert file types with client-side zero-latency processing.',
+    acceptTypes: 'image/*',
+    iconName: 'ArrowRightLeft',
+  },
+  {
+    id: 'dpi',
+    name: 'Change DPI / PPI',
+    category: 'image',
+    tagline: 'Set print resolution to 150, 200, 300, or 600 DPI',
+    description: 'Ensure your image meets strict print resolution requirements for physical ID cards and passports.',
+    acceptTypes: 'image/*',
+    iconName: 'Printer',
+  },
+  {
+    id: 'background',
+    name: 'Background Changer',
+    category: 'image',
+    tagline: 'Change to pure white, off-white, light blue, or transparent',
+    description: 'Browser-based privacy-first background removal and solid color replacement.',
+    badge: 'Privacy-First',
+    acceptTypes: 'image/*',
+    popular: true,
+    iconName: 'Sparkles',
+  },
+  {
+    id: 'editor',
+    name: 'Comprehensive Photo Editor',
+    category: 'image',
+    tagline: 'Adjust brightness, contrast, sharpness, rotation, and curves',
+    description: 'Full studio controls to clean up lighting, shadows, and angle imperfections.',
+    acceptTypes: 'image/*',
+    iconName: 'Sliders',
+  },
+
+  // --- PHOTO TOOLS ---
+  {
+    id: 'passport',
+    name: 'Passport Photo Maker',
+    category: 'photo',
+    tagline: 'Official 2x2" and 35x45mm passport photos with biometric guides',
+    description: 'Built-in presets for US, UK, Schengen, India, Canada, and Australia with face ratio overlays.',
+    badge: 'Official Specs',
+    acceptTypes: 'image/*',
+    defaultPresetId: 'us-passport',
+    popular: true,
+    iconName: 'UserCheck',
+  },
+  {
+    id: 'visa',
+    name: 'Visa Photo Creator',
+    category: 'photo',
+    tagline: 'Compliant visa photos for US, Schengen, UK, UAE & China',
+    description: 'Format photos to meet strict embassy guidelines with automatic white background and sizing.',
+    acceptTypes: 'image/*',
+    defaultPresetId: 'uk-eu-passport',
+    popular: true,
+    iconName: 'Compass',
+  },
+  {
+    id: 'id-photo',
+    name: 'Driving License & PAN Card Photo',
+    category: 'photo',
+    tagline: '2.5x3.5 cm & 3.5x4.5 cm card-ready portraits',
+    description: 'Quickly produce photos for state IDs, student cards, employee badges, and driving licenses.',
+    acceptTypes: 'image/*',
+    defaultPresetId: 'driving-license-photo',
+    iconName: 'CreditCard',
+  },
+  {
+    id: 'photo-sheet',
+    name: 'Printable Photo Sheet',
+    category: 'photo',
+    tagline: 'Print 4, 6, 8, 12, or 16 passport photos on A4 or 4x6" paper',
+    description: 'Generates a ready-to-print grid with scissor cut marks to print at home or pharmacy.',
+    badge: 'Print Ready',
+    acceptTypes: 'image/*',
+    popular: true,
+    iconName: 'Grid',
+  },
+
+  // --- APPLICATION TOOLS ---
+  {
+    id: 'signature',
+    name: 'Signature Resizer & Enhancer',
+    category: 'application',
+    tagline: 'Auto-crop paper, whiten background, and recolor ink to black or blue',
+    description: 'Format signatures to 140x60px, 350x350px, or custom sizes under 10-20 KB with zero paper grain.',
+    badge: 'Most Used',
+    acceptTypes: 'image/*',
+    defaultPresetId: 'general-signature-jpg',
+    popular: true,
+    iconName: 'PenTool',
+  },
+  {
+    id: 'thumb',
+    name: 'Thumb Impression Tool',
+    category: 'application',
+    tagline: 'Enhance dermal ridges, remove paper shadow, and hit 20-50 KB',
+    description: 'Specially tuned high-contrast filter designed for bank and exam biometric thumb scans.',
+    acceptTypes: 'image/*',
+    defaultPresetId: 'ibps-thumb',
+    popular: true,
+    iconName: 'Fingerprint',
+  },
+  {
+    id: 'photo-sign',
+    name: 'Photo + Signature Combo Slip',
+    category: 'application',
+    tagline: 'Stack photo and signature into a single uploadable image',
+    description: 'Perfect for applications that ask for a combined admit card slip or single-file verification image.',
+    acceptTypes: 'image/*',
+    defaultPresetId: 'photo-sign-combo',
+    iconName: 'SplitSquareVertical',
+  },
+  {
+    id: 'scanner',
+    name: 'Document Scanner & Binarizer',
+    category: 'application',
+    tagline: 'Turn mobile photos of documents into crisp, sharp B&W scans',
+    description: 'Enhance contrast, whiten shadows, and sharpen text lines for certificate uploads.',
+    acceptTypes: 'image/*',
+    iconName: 'FileCheck',
+  },
+
+  // --- PDF TOOLS ---
+  {
+    id: 'img-to-pdf',
+    name: 'Images to PDF',
+    category: 'pdf',
+    tagline: 'Combine JPG & PNG documents into a single A4 / Letter PDF',
+    description: 'Select one or more images, choose page size, margins, and download an organized PDF.',
+    badge: 'Universal',
+    acceptTypes: 'image/*',
+    popular: true,
+    iconName: 'FileUp',
+  },
+  {
+    id: 'pdf-to-img',
+    name: 'PDF to JPG / PNG',
+    category: 'pdf',
+    tagline: 'Extract crisp high-resolution images from any PDF file',
+    description: 'Convert PDF pages into downloadable JPEG or PNG images at up to 300 DPI.',
+    acceptTypes: 'application/pdf',
+    popular: true,
+    iconName: 'FileDown',
+  },
+  {
+    id: 'pdf-merge',
+    name: 'Merge PDF Files',
+    category: 'pdf',
+    tagline: 'Combine multiple PDF documents into one ordered file',
+    description: 'Upload multiple certificates, marksheets, or IDs and merge them securely in your browser.',
+    acceptTypes: 'application/pdf',
+    popular: true,
+    iconName: 'Files',
+  },
+  {
+    id: 'pdf-split',
+    name: 'Split & Extract PDF Pages',
+    category: 'pdf',
+    tagline: 'Extract specific page ranges (e.g. 1-3, 5, 8-10)',
+    description: 'Isolate individual pages or sections from large multi-page application forms.',
+    acceptTypes: 'application/pdf',
+    iconName: 'Scissors',
+  },
+  {
+    id: 'pdf-organizer',
+    name: 'Reorder & Rotate PDF',
+    category: 'pdf',
+    tagline: 'Rotate sideways pages and rearrange page order',
+    description: 'Fix upside-down scanned certificates and reorder pages effortlessly.',
+    acceptTypes: 'application/pdf',
+    iconName: 'RotateCw',
+  },
+];

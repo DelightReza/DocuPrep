@@ -1,0 +1,6 @@
+{
+  "name": "DocuPrep",
+  "description": "All-in-One Document, Photo, Signature, Thumb Impression & PDF Editor. Prepare, resize, sign, convert, and submit for exams, visas, passports, and online applications.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
