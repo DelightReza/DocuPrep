@@ -130,6 +130,11 @@ export async function extractPdfPages(
   return await newDoc.save();
 }
 
+export async function getPdfPageCount(pdfBuffer: ArrayBuffer): Promise<number> {
+  const pdfDoc = await PDFDocument.load(pdfBuffer, { ignoreEncryption: true });
+  return pdfDoc.getPageCount();
+}
+
 /**
  * Parses user range string (e.g. "1-3, 5, 8-10") into an array of page numbers
  */

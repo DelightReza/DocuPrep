@@ -1514,7 +1514,6 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
               value={activePreset?.id || 'original'}
               onChange={(e) => {
                 const p = getAllPresets().find((item) => item.id === e.target.value);
-                if (p) applyPreset(p);
               }}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs font-medium text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:border-indigo-500"
             >
@@ -1556,9 +1555,15 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
                 </optgroup>
               )}
             </select>
+            {editorMode === 'simple' && (
+              <div className="rounded-xl border border-indigo-200 bg-indigo-50/70 p-3 text-xs text-indigo-800 dark:border-indigo-900/60 dark:bg-indigo-950/30 dark:text-indigo-200">
+                Simple Mode uses the selected preset automatically. Switch to Advanced Mode for manual dimensions, DPI, format, and enhancement controls.
+              </div>
+            )}
           </div>
 
           {/* Dimensions & Resolution Controls */}
+          {editorMode === 'advanced' && (
           <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
@@ -1713,6 +1718,7 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
               </div>
             </div>
           </div>
+          )}
 
           {/* Compression & Target File Size (Fully Editable) */}
           <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-4">

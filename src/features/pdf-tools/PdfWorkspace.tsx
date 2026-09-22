@@ -22,6 +22,7 @@ import {
   convertImagesToPdf,
   mergePdfs,
   extractPdfPages,
+  getPdfPageCount,
   parsePageRangeString,
   rotatePdfPages,
   compressPdf,
@@ -96,15 +97,38 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
 
   // Helper to load image dimensions
   const loadImageInfo = (file: File): Promise<{ dataUrl: string; width: number; height: number }> => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader();
+      reader.onerror = () => reject(new Error(`Could not read image: ${file.name}`));
       reader.onload = (e) => {
-        const dataUrl = e.target?.result as string;
+        const sourceDataUrl = e.target?.result as string;
         const img = new Image();
+        img.onerror = () => reject(new Error(`Could not decode image: ${file.name}`));
         img.onload = () => {
-          resolve({ dataUrl, width: img.naturalWidth, height: img.naturalHeight });
+          if (file.type === 'image/png') {
+            resolve({ dataUrl: sourceDataUrl, width: img.naturalWidth, height: img.naturalHeight });
+            return;
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const context = canvas.getContext('2d');
+          if (!context) {
+            reject(new Error(`Could not prepare image: ${file.name}`));
+            return;
+          }
+
+          context.fillStyle = '#ffffff';
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.drawImage(img, 0, 0);
+          resolve({
+            dataUrl: canvas.toDataURL('image/jpeg', 0.95),
+            width: img.naturalWidth,
+            height: img.naturalHeight,
+          });
         };
-        img.src = dataUrl;
+        img.src = sourceDataUrl;
       };
       reader.readAsDataURL(file);
     });
@@ -248,13 +272,18 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
     if (!file) return;
     setSourcePdfForSplit(file);
     setIsLoading(true);
+    setErrorMessage(null);
+    setStatusMessage('Reading PDF page count...');
     try {
       const buffer = await file.arrayBuffer();
-      const pages = await renderPdfToCanvases(buffer, [1]);
-      setSplitTotalPages(pages.length > 0 ? 10 : 1); // approximate or read
+      const totalPages = await getPdfPageCount(buffer);
+      setSplitTotalPages(totalPages);
       setSplitRangeStr('1');
-    } catch {
-      // fallback
+      setStatusMessage(`Loaded ${totalPages} page${totalPages === 1 ? '' : 's'} ready for extraction.`);
+      if (e.target) e.target.value = '';
+    } catch (err: any) {
+      setSplitTotalPages(1);
+      setErrorMessage(err.message || 'Could not read PDF page count.');
     } finally {
       setIsLoading(false);
     }
@@ -267,7 +296,7 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
     setErrorMessage(null);
     try {
       const buffer = await sourcePdfForSplit.arrayBuffer();
-      const pages = parsePageRangeString(splitRangeStr, 100);
+      const pages = parsePageRangeString(splitRangeStr, splitTotalPages);
       if (pages.length === 0) {
         throw new Error('Please enter a valid page number or range (e.g. 1-3, 5).');
       }
