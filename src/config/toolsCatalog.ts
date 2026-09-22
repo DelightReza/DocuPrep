@@ -216,6 +216,17 @@ export const TOOLS_CATALOG: ToolItem[] = [
     iconName: 'Scissors',
   },
   {
+    id: 'pdf-compress',
+    name: 'Compress PDF',
+    category: 'pdf',
+    tagline: 'Compress PDF to under 100KB, 200KB, 500KB or 1MB',
+    description: 'Intelligently compress certificates, marksheets, and multi-page forms to meet government & job portal file size limits.',
+    badge: 'Target KB',
+    acceptTypes: 'application/pdf',
+    popular: true,
+    iconName: 'FileArchive',
+  },
+  {
     id: 'pdf-organizer',
     name: 'Reorder & Rotate PDF',
     category: 'pdf',

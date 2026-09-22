@@ -1,4 +1,10 @@
 import { PDFDocument, rgb, degrees, StandardFonts } from 'pdf-lib';
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Ensure PDF.js worker is registered
+if (typeof window !== 'undefined' && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version || '4.10.38'}/pdf.worker.min.mjs`;
+}
 
 export interface ImageToPdfOptions {
   pageSize: 'A4' | 'Letter' | 'Legal' | 'Original';
@@ -219,4 +225,141 @@ export async function stampPdfPage(
   }
 
   return await doc.save();
+}
+
+export interface CompressPdfOptions {
+  level: 'extreme' | 'recommended' | 'low' | 'custom';
+  targetMaxKb?: number | null;
+  customDpi?: number;
+  customQuality?: number;
+  onProgress?: (current: number, total: number) => void;
+}
+
+export interface CompressPdfResult {
+  pdfBytes: Uint8Array;
+  originalSizeKb: number;
+  compressedSizeKb: number;
+  reductionPercent: number;
+  pageCount: number;
+  targetAchieved: boolean;
+}
+
+/**
+ * Intelligent PDF Compressor:
+ * Re-samples and re-compresses embedded page graphics to target DPI and quality levels,
+ * preserving layout geometry while dramatically shrinking file size for portal submissions.
+ */
+export async function compressPdf(
+  pdfBuffer: ArrayBuffer,
+  options: CompressPdfOptions
+): Promise<CompressPdfResult> {
+  const originalSizeKb = Number((pdfBuffer.byteLength / 1024).toFixed(1));
+
+  // Load document with pdfjsLib to inspect page count and render pages
+  const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(pdfBuffer.slice(0)) });
+  const pdfDoc = await loadingTask.promise;
+  const numPages = pdfDoc.numPages;
+
+  // Determine scaling & quality parameters based on compression level / targetMaxKb
+  let dpiScale = 1.4;
+  let jpegQuality = 0.70;
+
+  if (options.level === 'extreme') {
+    // Aggressive compression for strict < 100-200 KB government limits
+    dpiScale = 1.1;
+    jpegQuality = 0.50;
+  } else if (options.level === 'recommended') {
+    // Balanced compression: crisp 100 DPI readability, 60-80% file reduction
+    dpiScale = 1.45;
+    jpegQuality = 0.70;
+  } else if (options.level === 'low') {
+    // High clarity, light compression
+    dpiScale = 1.85;
+    jpegQuality = 0.82;
+  } else if (options.level === 'custom') {
+    if (options.targetMaxKb && options.targetMaxKb > 0) {
+      const budgetPerPage = (options.targetMaxKb * 0.9) / Math.max(1, numPages);
+
+      if (budgetPerPage < 35) {
+        dpiScale = 0.95;
+        jpegQuality = 0.42;
+      } else if (budgetPerPage < 70) {
+        dpiScale = 1.15;
+        jpegQuality = 0.55;
+      } else if (budgetPerPage < 150) {
+        dpiScale = 1.4;
+        jpegQuality = 0.68;
+      } else if (budgetPerPage < 300) {
+        dpiScale = 1.7;
+        jpegQuality = 0.78;
+      } else {
+        dpiScale = 2.0;
+        jpegQuality = 0.85;
+      }
+    } else {
+      if (options.customDpi) dpiScale = options.customDpi / 72;
+      if (options.customQuality) jpegQuality = Math.max(0.1, Math.min(1.0, options.customQuality / 100));
+    }
+  }
+
+  const newPdfDoc = await PDFDocument.create();
+
+  for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+    if (options.onProgress) {
+      options.onProgress(pageNum, numPages);
+    }
+
+    const page = await pdfDoc.getPage(pageNum);
+    // Base viewport at scale 1.0 represents original PDF dimensions in points
+    const baseViewport = page.getViewport({ scale: 1.0 });
+    const targetWidthPts = baseViewport.width;
+    const targetHeightPts = baseViewport.height;
+
+    // Render viewport at target scale
+    const renderViewport = page.getViewport({ scale: dpiScale });
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(renderViewport.width));
+    canvas.height = Math.max(1, Math.round(renderViewport.height));
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) continue;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    await (page.render({
+      canvasContext: ctx,
+      viewport: renderViewport,
+      canvas: canvas as any,
+    } as any)).promise;
+
+    // Convert canvas to compressed JPEG
+    const jpegDataUrl = canvas.toDataURL('image/jpeg', jpegQuality);
+    const embeddedImg = await newPdfDoc.embedJpg(jpegDataUrl);
+
+    // Create page matching original document points
+    const newPage = newPdfDoc.addPage([targetWidthPts, targetHeightPts]);
+    newPage.drawImage(embeddedImg, {
+      x: 0,
+      y: 0,
+      width: targetWidthPts,
+      height: targetHeightPts,
+    });
+  }
+
+  const compressedBytes = await newPdfDoc.save({ useObjectStreams: true });
+  const compressedSizeKb = Number((compressedBytes.byteLength / 1024).toFixed(1));
+  const reductionPercent = Math.max(
+    0,
+    Math.round(((originalSizeKb - compressedSizeKb) / originalSizeKb) * 100)
+  );
+  const targetAchieved = options.targetMaxKb ? compressedSizeKb <= options.targetMaxKb : true;
+
+  return {
+    pdfBytes: compressedBytes,
+    originalSizeKb,
+    compressedSizeKb,
+    reductionPercent,
+    pageCount: numPages,
+    targetAchieved,
+  };
 }

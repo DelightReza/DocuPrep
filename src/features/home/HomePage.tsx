@@ -321,7 +321,24 @@ export const HomePage: React.FC<HomePageProps> = ({
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+              <div
+                onClick={() => onOpenPdfSuite('pdf-compress')}
+                className="p-5 rounded-2xl border border-indigo-200 dark:border-indigo-900/60 bg-white dark:bg-slate-900 hover:shadow-md hover:border-indigo-500 transition cursor-pointer relative group"
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                    Compress PDF
+                  </div>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400">
+                    &lt; 200 KB
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Reduce multi-page files to fit portal limits with custom DPI and target size.
+                </p>
+              </div>
+
               <div
                 onClick={() => onOpenPdfSuite('img-to-pdf')}
                 className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-md hover:border-indigo-500/50 transition cursor-pointer"

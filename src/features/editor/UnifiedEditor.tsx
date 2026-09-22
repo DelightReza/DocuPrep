@@ -28,7 +28,8 @@ import {
   Camera,
   Eye,
   Lock,
-  Unlock
+  Unlock,
+  Loader2
 } from 'lucide-react';
 import {
   ToolId,
@@ -124,6 +125,10 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
   const [aiReport, setAiReport] = useState<ComplianceReport | null>(null);
   const [isAiAnalyzing, setIsAiAnalyzing] = useState<boolean>(false);
 
+  // Preview & Drag State
+  const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+
   // Canvas Refs
   const outputCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -178,6 +183,13 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
         setCustomFilename(file.name.replace(/\.[^/.]+$/, '') + '_docuprep');
         // Reset crop box
         setCropRect({ x: 0.05, y: 0.05, w: 0.9, h: 0.9 });
+
+        // If no preset active, adopt natural image dimensions in px
+        if (!activePreset && !initialPresetId) {
+          setUnit('px');
+          setWidthVal(img.naturalWidth);
+          setHeightVal(img.naturalHeight);
+        }
       };
       img.src = e.target?.result as string;
     };
@@ -299,8 +311,15 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
         }
       }
 
-      // Store canvas in ref for UI preview
+      // Store canvas in ref for UI preview, photo sheets, compliance inspector & exports
       outputCanvasRef.current = finalCanvas;
+
+      // Generate instant high-fidelity preview data URL for the DOM viewport
+      const previewUrl = finalCanvas.toDataURL(
+        outputFormat === 'png' ? 'image/png' : 'image/jpeg',
+        0.92
+      );
+      setPreviewDataUrl(previewUrl);
 
       // 8. Compression & File Size optimization
       const compResult = await compressCanvas(
@@ -573,24 +592,80 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Interactive Canvas Viewport */}
         <div className="lg:col-span-7 flex flex-col space-y-4">
-          {/* Canvas Wrapper */}
-          <div className="relative flex flex-col items-center justify-center min-h-[420px] sm:min-h-[500px] rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-100/80 dark:bg-slate-950 p-4 overflow-hidden shadow-inner">
+          {/* Hidden File Inputs (Always Mounted in DOM) */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onClick={(e) => {
+              (e.target as HTMLInputElement).value = '';
+            }}
+            onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
+            className="hidden"
+          />
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onClick={(e) => {
+              (e.target as HTMLInputElement).value = '';
+            }}
+            onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
+            className="hidden"
+          />
+
+          {/* Canvas & Preview Wrapper */}
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDragging(true);
+            }}
+            onDragLeave={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDragging(false);
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDragging(false);
+              const file = e.dataTransfer.files?.[0];
+              if (file && (file.type.startsWith('image/') || /\.(jpe?g|png|webp)$/i.test(file.name))) {
+                handleFileSelect(file);
+              }
+            }}
+            className={`relative flex flex-col items-center justify-center min-h-[420px] sm:min-h-[500px] rounded-2xl border-2 transition-all p-4 overflow-hidden shadow-inner ${
+              isDragging
+                ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30'
+                : 'border-slate-200 dark:border-slate-800 bg-slate-100/80 dark:bg-slate-950'
+            }`}
+          >
             {sourceImage ? (
               <div
                 className={`relative flex items-center justify-center max-w-full max-h-[460px] overflow-auto rounded-xl shadow-lg border border-slate-300 dark:border-slate-700 transition-all ${
                   showCheckerboard ? 'checkerboard-bg' : 'bg-white'
                 }`}
               >
-                {/* Rendered Output Canvas */}
-                <canvas
-                  ref={outputCanvasRef}
-                  style={{
-                    transform: `scale(${zoomLevel})`,
-                    transformOrigin: 'center center',
-                    transition: 'transform 0.15s ease-out',
-                  }}
-                  className="max-h-[420px] w-auto h-auto object-contain block"
-                />
+                {/* Rendered Output Preview Image */}
+                {previewDataUrl ? (
+                  <img
+                    src={previewDataUrl}
+                    alt="Document Preview"
+                    style={{
+                      transform: `scale(${zoomLevel})`,
+                      transformOrigin: 'center center',
+                      transition: 'transform 0.15s ease-out',
+                    }}
+                    className="max-h-[420px] w-auto h-auto object-contain block select-none pointer-events-none"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-24 px-12 text-slate-400">
+                    <Loader2 className="h-8 w-8 animate-spin text-indigo-500 mb-2" />
+                    <span className="text-xs font-medium">Processing document preview...</span>
+                  </div>
+                )}
 
                 {/* Biometric Face Guide Overlay (Passport / Visa) */}
                 {showFaceGuide && activePreset?.category === 'passport' && (
@@ -609,34 +684,21 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
               </div>
             ) : (
               /* Empty State Upload Dropzone */
-              <div className="flex flex-col items-center justify-center p-8 text-center max-w-md">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
-                  className="hidden"
-                />
-                <input
-                  ref={cameraInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
-                  className="hidden"
-                />
-
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 mb-4 animate-bounce">
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="flex flex-col items-center justify-center p-8 text-center max-w-md cursor-pointer group"
+              >
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 mb-4 group-hover:scale-105 transition-transform">
                   <Upload className="h-8 w-8" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">
                   Upload Photo, Signature or Document
                 </h3>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  Drag and drop JPG, PNG, or WebP here. All processing happens 100% locally in your browser.
+                  Drag and drop JPG, PNG, or WebP here, or click to browse. All processing happens 100% locally in your browser.
                 </p>
 
-                <div className="mt-5 flex items-center gap-3">
+                <div className="mt-5 flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     className="flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 text-xs font-semibold shadow-md shadow-indigo-500/20"
@@ -658,7 +720,7 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
 
           {/* Viewport Control Bar */}
           {sourceImage && (
-            <div className="flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs">
+            <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setZoomLevel((z) => Math.max(0.5, z - 0.25))}
@@ -685,8 +747,17 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
                 </button>
               </div>
 
-              {/* Toggles */}
+              {/* Toggles and Change Image Action */}
               <div className="flex items-center gap-3">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-indigo-200 dark:border-indigo-800 bg-indigo-50/80 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-semibold text-[11px] hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition"
+                  title="Choose a different image file"
+                >
+                  <Upload className="h-3.5 w-3.5" />
+                  <span>Change Image</span>
+                </button>
+
                 <label className="flex items-center gap-1.5 cursor-pointer">
                   <input
                     type="checkbox"
