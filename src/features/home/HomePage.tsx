@@ -86,7 +86,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto pt-8 border-t border-slate-200/60 dark:border-slate-800/60 text-left">
             <div>
               <div className="text-xl font-black text-slate-900 dark:text-white">20+ Tools</div>
-              <div className="text-xs text-slate-500">Passports, Visas, PDFs & Exams</div>
+              <div className="text-xs text-slate-500">Passports, Visas, PDFs & Forms</div>
             </div>
             <div>
               <div className="text-xl font-black text-slate-900 dark:text-white">&lt; 20-50 KB</div>
@@ -108,9 +108,15 @@ export const HomePage: React.FC<HomePageProps> = ({
       <section className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Popular Official Application Requirements
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-1.5">
+                <span className="text-base">📋</span>
+                Popular Official Document & ID Specifications
+              </span>
+              <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold">
+                Direct Portal Sizing
+              </span>
+            </div>
             <button
               onClick={onOpenPresetBuilder}
               className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
@@ -120,18 +126,25 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
-            {BUILT_IN_PRESETS.slice(0, 7).map((p) => (
+            {BUILT_IN_PRESETS.slice(0, 10).map((p) => (
               <button
                 key={p.id}
                 onClick={() => onSelectTool('passport', p.id)}
-                className="flex flex-col text-left p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 hover:border-indigo-500 hover:bg-indigo-50/30 dark:hover:bg-indigo-950/30 transition flex-shrink-0 min-w-[200px]"
+                className="flex flex-col text-left p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 hover:border-indigo-500 hover:bg-indigo-50/30 dark:hover:bg-indigo-950/30 transition flex-shrink-0 min-w-[210px]"
               >
-                <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                  {p.name}
-                </span>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                <div className="flex items-center justify-between gap-1 mb-0.5">
+                  <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                    {p.name}
+                  </span>
+                </div>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">
                   {p.width}x{p.height} {p.unit} • {p.dpi} DPI {p.maxKb ? `• <${p.maxKb}KB` : ''}
                 </span>
+                {p.countryOrOrg && (
+                  <span className="text-[10px] font-medium text-indigo-600 dark:text-indigo-400 mt-1">
+                    {p.countryOrOrg}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -163,20 +176,20 @@ export const HomePage: React.FC<HomePageProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div
-                onClick={() => onSelectTool('passport', 'us-passport')}
+                onClick={() => onSelectTool('passport', 'passport-standard-35x45')}
                 className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-lg hover:border-indigo-500/50 transition cursor-pointer group"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 mb-4 group-hover:scale-105 transition-transform">
                   <UserCheck className="h-6 w-6" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors">
-                  Passport Photo Maker (2x2" & 35x45mm)
+                  Standard Passport & Visa Photo Maker (35×45 mm & 51×51 mm)
                 </h3>
                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                  Interactive face guide overlays ensuring 50-70% head size ratios, eye-line alignment, and white background replacement.
+                  Universal standard 35×45 mm with 70–80% face ratio, pure white background replacement, and 51×51 mm (2×2") square specifications.
                 </p>
                 <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
-                  <span>Open US / UK / India / Schengen Presets</span>
+                  <span>Open Passport & Document Presets</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </div>
               </div>
@@ -400,13 +413,19 @@ export const HomePage: React.FC<HomePageProps> = ({
             </h2>
             <div className="space-y-4 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
               <p>
-                <strong>US Passport & Visa:</strong> Requires a square 2 x 2 inch (51 x 51 mm) photograph printed at 300 DPI (600 x 600 pixels). The head must be centered and measure between 1 inch and 1 3/8 inches (25 to 35 mm) from the bottom of the chin to the top of the head against an unadorned white or off-white background.
+                <strong>Standard Passport & ID (35 × 45 mm):</strong> Mandates a 35 × 45 mm portrait with 70% to 80% face coverage centered on a pure white or light neutral background (approx 413 × 531 pixels at 300 DPI, typically under 100–200 KB).
               </p>
               <p>
-                <strong>UK & Schengen Passport:</strong> Standardized at 35 x 45 mm (approximately 413 x 531 pixels at 300 DPI). The face must occupy between 70% to 80% of the photograph height with natural skin tones and a light grey or cream background.
+                <strong>Square Format (2 × 2 inch / 51 × 51 mm):</strong> Standard 51 × 51 mm (600 × 600 pixels at 300 DPI) square photo with 50% to 69% head ratio against a plain white background, typically under 200–240 KB.
               </p>
               <p>
-                <strong>Indian Recruitment & Exams (UPSC / SSC / IBPS):</strong> UPSC Civil Services portal mandates a 350 x 350 pixel photo and signature under 300 KB. SSC requires photos between 20 KB and 50 KB and signatures strictly between 10 KB and 20 KB. IBPS Banking requires photos between 20-50 KB and left thumb impressions between 20-50 KB in blue or black ink.
+                <strong>Standard Signature Boxes:</strong> Running handwritten signatures on white paper in dark ink. Standard ratios include 3.5 × 1.5 cm (7:3 ratio, 10–30 KB), 4.0 × 2.0 cm (2:1 ratio, 10–20 KB), and 7.0 × 2.0 cm wide strips.
+              </p>
+              <p>
+                <strong>Biometric Thumb & Finger Impressions:</strong> Scanned dermal ridge impressions on pure white paper with enhanced contrast, formatted to 3.5 × 1.5 cm or 3.0 × 3.0 cm square (strictly 10–50 KB).
+              </p>
+              <p>
+                <strong>Card-Size Portraits & Postcard Slips:</strong> Compact 2.5 × 3.5 cm card photos under 50 KB, and 4 × 6 inch postcard photos under 200 KB for physical or multi-photo requirements.
               </p>
             </div>
           </div>

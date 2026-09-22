@@ -94,7 +94,7 @@ export const ToolsCatalog: React.FC<ToolsCatalogProps> = ({
             All Document & Photo Tools
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 max-w-xl">
-            Choose from over 20+ specialized tools designed for official portal submissions, exam registrations, and passport offices.
+            Choose from specialized tools designed for official portal submissions, identity documents, and application requirements.
           </p>
         </div>
 

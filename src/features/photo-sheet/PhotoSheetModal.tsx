@@ -211,9 +211,18 @@ export const PhotoSheetModal: React.FC<PhotoSheetModalProps> = ({
                     setPhotoWidthMm(35);
                     setPhotoHeightMm(45);
                   }}
+                  className="rounded bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 text-[10px] font-semibold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 border border-indigo-200/50"
+                >
+                  35×45 mm (Standard Portrait)
+                </button>
+                <button
+                  onClick={() => {
+                    setPhotoWidthMm(25);
+                    setPhotoHeightMm(35);
+                  }}
                   className="rounded bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-200"
                 >
-                  35x45 mm (Standard)
+                  25×35 mm (Compact ID)
                 </button>
                 <button
                   onClick={() => {
@@ -222,7 +231,16 @@ export const PhotoSheetModal: React.FC<PhotoSheetModalProps> = ({
                   }}
                   className="rounded bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-200"
                 >
-                  2x2 inch (US Passport)
+                  51×51 mm (2×2" Square)
+                </button>
+                <button
+                  onClick={() => {
+                    setPhotoWidthMm(101.6);
+                    setPhotoHeightMm(152.4);
+                  }}
+                  className="rounded bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-200"
+                >
+                  102×152 mm (4×6" Postcard)
                 </button>
                 <button
                   onClick={() => {
@@ -231,7 +249,7 @@ export const PhotoSheetModal: React.FC<PhotoSheetModalProps> = ({
                   }}
                   className="rounded bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-200"
                 >
-                  50x70 mm (Canada)
+                  50×70 mm (Large Portrait)
                 </button>
               </div>
             </div>

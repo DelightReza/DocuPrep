@@ -17,11 +17,12 @@ export interface RenderedPdfPage {
  * Loads a PDF from ArrayBuffer and renders all or selected pages to canvas
  */
 export async function renderPdfToCanvases(
-  pdfBuffer: ArrayBuffer,
+  pdfBuffer: ArrayBuffer | Uint8Array,
   pageNumbers?: number[],
   dpiScale: number = 2.0 // scale 2.0 gives ~150-200 DPI crisp render
 ): Promise<RenderedPdfPage[]> {
-  const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(pdfBuffer) });
+  const data = pdfBuffer instanceof Uint8Array ? pdfBuffer : new Uint8Array(pdfBuffer);
+  const loadingTask = pdfjsLib.getDocument({ data });
   const pdfDoc = await loadingTask.promise;
   const numPages = pdfDoc.numPages;
 

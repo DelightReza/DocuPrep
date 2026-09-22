@@ -33,6 +33,8 @@ export type UnitType = 'px' | 'mm' | 'cm' | 'inch';
 
 export type OutputFormat = 'jpeg' | 'png' | 'webp' | 'pdf';
 
+export type ResizeFitMode = 'cover' | 'contain';
+
 export interface PresetRequirement {
   id: string;
   name: string;

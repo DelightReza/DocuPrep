@@ -74,7 +74,7 @@ export const CustomPresetModal: React.FC<CustomPresetModalProps> = ({
                 Custom Requirement Presets
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Save exam or employer specific photo/document specs for instant reuse
+                Save portal or document photo/signature specifications for instant reuse
               </p>
             </div>
           </div>
@@ -133,7 +133,7 @@ export const CustomPresetModal: React.FC<CustomPresetModalProps> = ({
 
             <div>
               <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                Preset Name (e.g. State Police Exam Photo, ABC College ID)
+                Preset Name (e.g. Identity Photo, Verification Badge, Portal Spec)
               </label>
               <input
                 type="text"
