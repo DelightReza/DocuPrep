@@ -56,6 +56,7 @@ import { processDocumentScan, ScanMode } from '../../lib/image/scannerEngine';
 interface UnifiedEditorProps {
   initialTool?: ToolId;
   initialPresetId?: string;
+  initialImage?: { dataUrl: string; filename: string } | null;
   editorMode: 'simple' | 'advanced';
   onOpenSignaturePad: () => void;
   onOpenPhotoSheet: (canvas: HTMLCanvasElement, widthMm: number, heightMm: number) => void;
@@ -65,6 +66,7 @@ interface UnifiedEditorProps {
 export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
   initialTool = 'editor',
   initialPresetId,
+  initialImage,
   editorMode,
   onOpenSignaturePad,
   onOpenPhotoSheet,
@@ -266,6 +268,17 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
     };
     reader.readAsDataURL(file);
   };
+
+  useEffect(() => {
+    if (!initialImage) return;
+
+    fetch(initialImage.dataUrl)
+      .then((response) => response.blob())
+      .then((blob) => {
+        handleFileSelect(new File([blob], initialImage.filename, { type: blob.type || 'image/png' }));
+      })
+      .catch((error) => console.error('Failed to open generated image:', error));
+  }, [initialImage]);
 
   // Fixed aspect ratio crop updater
   const updateCropRectForAspect = (targetRatio: number | null, img: HTMLImageElement) => {

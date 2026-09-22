@@ -38,6 +38,10 @@ export default function App() {
   const [isCustomPresetOpen, setIsCustomPresetOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [pendingEditorImage, setPendingEditorImage] = useState<{
+    dataUrl: string;
+    filename: string;
+  } | null>(null);
 
   // Settings & Theme
   const [editorMode, setEditorMode] = useState<'simple' | 'advanced'>('advanced');
@@ -81,6 +85,12 @@ export default function App() {
     setPhotoSheetCanvas(canvas);
     setPhotoSheetDims({ widthMm, heightMm });
     setIsPhotoSheetOpen(true);
+  };
+
+  const handleClearWorkspace = () => {
+    localStorage.removeItem('docuprep_custom_presets_v1');
+    setPendingEditorImage(null);
+    setActiveView('home');
   };
 
   // Save new custom preset
@@ -133,6 +143,7 @@ export default function App() {
           <UnifiedEditor
             initialTool={activeToolId}
             initialPresetId={activePresetId}
+            initialImage={pendingEditorImage}
             editorMode={editorMode}
             onOpenSignaturePad={() => setIsSignaturePadOpen(true)}
             onOpenPhotoSheet={handleLaunchPhotoSheet}
@@ -153,9 +164,7 @@ export default function App() {
       {/* Desktop & Tablet Footer */}
       <Footer
         onSelectTool={(toolId: any) => handleSelectTool(toolId)}
-        onClearWorkspace={() => {
-          setActiveView('home');
-        }}
+        onClearWorkspace={handleClearWorkspace}
         onOpenAbout={() => setIsAboutOpen(true)}
       />
 
@@ -173,7 +182,8 @@ export default function App() {
       <SignaturePadModal
         isOpen={isSignaturePadOpen}
         onClose={() => setIsSignaturePadOpen(false)}
-        onApplySignature={() => {
+        onApplySignature={(canvas, filename) => {
+          setPendingEditorImage({ dataUrl: canvas.toDataURL('image/png'), filename });
           setIsSignaturePadOpen(false);
           setActiveToolId('signature');
           setActiveView('editor');
@@ -201,10 +211,7 @@ export default function App() {
         onToggleDarkMode={() => setIsDark(!isDark)}
         editorMode={editorMode}
         onToggleMode={(mode) => setEditorMode(mode)}
-        onClearWorkspace={() => {
-          localStorage.removeItem('docuprep_custom_presets');
-          setActiveView('home');
-        }}
+        onClearWorkspace={handleClearWorkspace}
       />
 
       <AboutModal

@@ -154,6 +154,9 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
         })
       );
       setImgFiles((prev) => [...prev, ...newItems]);
+      setErrorMessage(null);
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Could not load one or more images.');
     } finally {
       setIsLoading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -542,6 +545,9 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
                 type="file"
                 multiple
                 accept="image/jpeg,image/png,image/webp"
+                onClick={(e) => {
+                  (e.target as HTMLInputElement).value = '';
+                }}
                 onChange={handleAddImages}
                 className="hidden"
               />
@@ -726,6 +732,9 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
             <input
               type="file"
               accept="application/pdf"
+              onClick={(e) => {
+                (e.target as HTMLInputElement).value = '';
+              }}
               onChange={handleSelectPdfForImages}
               className="hidden"
             />
@@ -795,6 +804,9 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
               type="file"
               multiple
               accept="application/pdf"
+              onClick={(e) => {
+                (e.target as HTMLInputElement).value = '';
+              }}
               onChange={handleAddMergePdfs}
               className="hidden"
             />
@@ -896,6 +908,9 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
             <input
               type="file"
               accept="application/pdf"
+              onClick={(e) => {
+                (e.target as HTMLInputElement).value = '';
+              }}
               onChange={handleSelectPdfForSplit}
               className="hidden"
             />
@@ -948,6 +963,9 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
             <input
               type="file"
               accept="application/pdf"
+              onClick={(e) => {
+                (e.target as HTMLInputElement).value = '';
+              }}
               onChange={handleSelectPdfForRotate}
               className="hidden"
             />
@@ -1020,6 +1038,9 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
           <input
             type="file"
             ref={compressInputRef}
+            onClick={(e) => {
+              (e.target as HTMLInputElement).value = '';
+            }}
             onChange={handleCompressPdfSelect}
             accept=".pdf,application/pdf"
             className="hidden"
