@@ -162,7 +162,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div
                 onClick={() => onSelectTool('passport', 'passport-standard-35x45')}
                 className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-lg hover:border-indigo-500/50 transition cursor-pointer group"
@@ -174,7 +174,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   Standard Passport & Visa Photo Maker (35×45 mm & 51×51 mm)
                 </h3>
                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                  Universal standard 35×45 mm with 70–80% face ratio, pure white background replacement, and 51×51 mm (2×2") square specifications.
+                  Universal standard 35×45 mm with 70–80% face ratio, biometric eye-level guides, and 51×51 mm (2×2") square specifications.
                 </p>
                 <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
                   <span>Open Passport & Document Presets</span>
@@ -197,25 +197,6 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </p>
                 <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-blue-600 dark:text-blue-400">
                   <span>Clean Document Scan</span>
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </div>
-              </div>
-
-              <div
-                onClick={() => onSelectTool('background')}
-                className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-lg hover:border-indigo-500/50 transition cursor-pointer group"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 mb-4 group-hover:scale-105 transition-transform">
-                  <Sparkles className="h-6 w-6" />
-                </div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 transition-colors">
-                  White & Off-White Background
-                </h3>
-                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                  Turn casual home photos into official document portraits by swapping background to pure white or transparent PNG.
-                </p>
-                <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                  <span>Change Background</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </div>
               </div>

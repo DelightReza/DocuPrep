@@ -126,7 +126,6 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
 
   // Interactive Viewport Zoom
   const [zoomLevel, setZoomLevel] = useState<number>(1);
-  const [showCheckerboard, setShowCheckerboard] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
   // Compression Output Cache
@@ -218,13 +217,6 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
 
     if (sourceImage) {
       updateCropRectForAspect(presetRatio, sourceImage);
-    }
-
-    if (preset.bgType === 'white') {
-      setAdjustments((prev) => ({ ...prev, backgroundColor: '#ffffff' }));
-    } else if (preset.bgType === 'transparent') {
-      setAdjustments((prev) => ({ ...prev, backgroundColor: 'transparent' }));
-      setShowCheckerboard(true);
     }
   };
 
@@ -1221,11 +1213,7 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
               ) : viewportMode === 'result' ? (
                 /* Dedicated Result Preview View */
                 <div className="w-full flex flex-col items-center space-y-4">
-                  <div
-                    className={`relative flex items-center justify-center max-w-full max-h-[440px] overflow-auto rounded-xl shadow-xl border-2 border-emerald-500/30 transition-all ${
-                      showCheckerboard ? 'checkerboard-bg' : 'bg-white dark:bg-slate-900'
-                    }`}
-                  >
+                  <div className="relative flex items-center justify-center max-w-full max-h-[440px] overflow-auto rounded-xl shadow-xl border-2 border-emerald-500/30 transition-all bg-white dark:bg-slate-900">
                     {previewDataUrl ? (
                       <img
                         src={previewDataUrl}
@@ -1337,11 +1325,7 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
                 </div>
               ) : (
                 /* Standard Interactive Live Viewport with Face Guide */
-                <div
-                  className={`relative flex items-center justify-center max-w-full max-h-[460px] overflow-auto rounded-xl shadow-lg border border-slate-300 dark:border-slate-700 transition-all ${
-                    showCheckerboard ? 'checkerboard-bg' : 'bg-white dark:bg-slate-900'
-                  }`}
-                >
+                <div className="relative flex items-center justify-center max-w-full max-h-[460px] overflow-auto rounded-xl shadow-lg border border-slate-300 dark:border-slate-700 transition-all bg-white dark:bg-slate-900">
                   {/* Rendered Output Preview Image */}
                   {previewDataUrl ? (
                     <img
@@ -1452,21 +1436,6 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
                   <Upload className="h-3.5 w-3.5" />
                   <span>Change Image</span>
                 </button>
-
-                <label
-                  className="flex items-center gap-1.5 cursor-pointer"
-                  title="Show checkered pattern behind transparent background areas (e.g., for PNG signatures or cutout portraits)"
-                >
-                  <input
-                    type="checkbox"
-                    checked={showCheckerboard}
-                    onChange={(e) => setShowCheckerboard(e.target.checked)}
-                    className="rounded border-slate-300 text-indigo-600"
-                  />
-                  <span className="text-[11px] text-slate-600 dark:text-slate-400">
-                    Transparency Grid
-                  </span>
-                </label>
 
                 {activePreset?.category === 'passport' && (
                   <label className="flex items-center gap-1.5 cursor-pointer">
@@ -1880,43 +1849,6 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
               </button>
             </div>
 
-            {/* Background Changer */}
-            <div>
-              <span className="text-[11px] font-medium text-slate-500 block mb-1.5">
-                Background Color (Passport / Official ID)
-              </span>
-              <div className="grid grid-cols-4 gap-2">
-                {[
-                  { label: 'Original', color: 'transparent', remove: false },
-                  { label: 'White', color: '#ffffff', remove: true },
-                  { label: 'Off-White', color: '#f8fafc', remove: true },
-                  { label: 'Transparent', color: 'transparent', remove: true },
-                ].map((item, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => {
-                      setAdjustments((prev) => ({
-                        ...prev,
-                        backgroundColor: item.color,
-                        removeBgActive: item.remove,
-                      }));
-                      if (item.color === 'transparent' && item.remove) {
-                        setOutputFormat('png');
-                        setShowCheckerboard(true);
-                      }
-                    }}
-                    className={`py-1.5 px-2 rounded-lg border text-xs font-semibold truncate ${
-                      adjustments.backgroundColor === item.color && adjustments.removeBgActive === item.remove
-                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300'
-                        : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* Document Scan Mode Filter */}
             <div>
               <span className="text-[11px] font-medium text-slate-500 block mb-1.5">
@@ -1966,9 +1898,7 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
                     setViewportMode('result');
                     setCropActive(false);
                   }}
-                  className={`w-20 h-24 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 cursor-pointer flex items-center justify-center flex-shrink-0 group hover:ring-2 hover:ring-indigo-500 transition ${
-                    showCheckerboard ? 'checkerboard-bg' : 'bg-slate-100 dark:bg-slate-800'
-                  }`}
+                  className="w-20 h-24 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 cursor-pointer flex items-center justify-center flex-shrink-0 group hover:ring-2 hover:ring-indigo-500 transition bg-slate-100 dark:bg-slate-800"
                 >
                   <img
                     src={previewDataUrl}

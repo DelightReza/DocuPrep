@@ -66,8 +66,8 @@ export const Footer: React.FC<FooterProps> = ({
                 </button>
               </li>
               <li>
-                <button onClick={() => onSelectTool('background')} className="hover:text-indigo-600 dark:hover:text-indigo-400">
-                  White / Off-White Background Changer
+                <button onClick={() => onSelectTool('dpi')} className="hover:text-indigo-600 dark:hover:text-indigo-400">
+                  DPI & Resolution Adjuster
                 </button>
               </li>
               <li>

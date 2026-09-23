@@ -64,17 +64,6 @@ export const TOOLS_CATALOG: ToolItem[] = [
     iconName: 'Sliders',
   },
   {
-    id: 'background',
-    name: 'Background Changer',
-    category: 'image',
-    tagline: 'Change to pure white, off-white, light blue, or transparent',
-    description: 'Browser-based privacy-first background removal and solid color replacement.',
-    badge: 'Privacy-First',
-    acceptTypes: 'image/*',
-    popular: true,
-    iconName: 'Sparkles',
-  },
-  {
     id: 'editor',
     name: 'Comprehensive Photo Editor',
     category: 'image',
