@@ -38,7 +38,7 @@ export const TOOLS_CATALOG: ToolItem[] = [
     id: 'compress',
     name: 'Compress to Target KB',
     category: 'image',
-    tagline: 'Binary search compression: Under 20KB, 50KB, 100KB, 200KB',
+    tagline: 'Binary search compression: Custom target KB or auto-optimization',
     description: 'Automatically hit government portal file size limits without unnecessary blur or pixelation.',
     badge: 'Popular',
     acceptTypes: 'image/*',

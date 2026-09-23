@@ -1,3 +1,4 @@
+import { saveSessionCache, loadSessionCache, clearSessionCache } from './lib/storage/cacheStorage';
 import React, { useState, useEffect } from 'react';
 import { ToolId, PresetRequirement, CustomPreset } from './types';
 import { Header } from './components/Header';
@@ -21,10 +22,23 @@ import { saveCustomPreset } from './config/presets';
 type ActiveView = 'home' | 'tools' | 'editor' | 'pdf';
 
 export default function App() {
-  const [activeView, setActiveView] = useState<ActiveView>('home');
-  const [activeToolId, setActiveToolId] = useState<ToolId>('editor');
-  const [activePresetId, setActivePresetId] = useState<string | undefined>(undefined);
-  const [pdfSubTool, setPdfSubTool] = useState<string>('img-to-pdf');
+  // Initialize from 15-minute session cache if available
+  const [activeView, setActiveView] = useState<ActiveView>(() => {
+    const cached = loadSessionCache();
+    return cached?.activeView || 'home';
+  });
+  const [activeToolId, setActiveToolId] = useState<ToolId>(() => {
+    const cached = loadSessionCache();
+    return (cached?.activeToolId as ToolId) || 'editor';
+  });
+  const [activePresetId, setActivePresetId] = useState<string | undefined>(() => {
+    const cached = loadSessionCache();
+    return cached?.activePresetId || undefined;
+  });
+  const [pdfSubTool, setPdfSubTool] = useState<string>(() => {
+    const cached = loadSessionCache();
+    return cached?.pdfSubTool || 'img-to-pdf';
+  });
 
   // Modals state
   const [isSignaturePadOpen, setIsSignaturePadOpen] = useState(false);
@@ -71,12 +85,28 @@ export default function App() {
     setActiveToolId(toolId);
     setActivePresetId(defaultPresetId);
     setActiveView('editor');
+    const cached = loadSessionCache();
+    saveSessionCache({
+      activeView: 'editor',
+      activeToolId: toolId,
+      activePresetId: defaultPresetId,
+      pdfSubTool,
+      editorState: cached?.editorState,
+    });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleOpenPdfSuite = (subTool: string = 'img-to-pdf') => {
     setPdfSubTool(subTool);
     setActiveView('pdf');
+    const cached = loadSessionCache();
+    saveSessionCache({
+      activeView: 'pdf',
+      activeToolId,
+      activePresetId,
+      pdfSubTool: subTool,
+      editorState: cached?.editorState,
+    });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -89,6 +119,7 @@ export default function App() {
 
   const handleClearWorkspace = () => {
     localStorage.removeItem('docuprep_custom_presets_v1');
+    clearSessionCache();
     setPendingEditorImage(null);
     setActiveView('home');
   };
@@ -109,7 +140,16 @@ export default function App() {
       <Header
         currentView={activeView}
         onNavigate={(view: any) => {
-          setActiveView(view as ActiveView);
+          const nextView = view as ActiveView;
+          setActiveView(nextView);
+          const cached = loadSessionCache();
+          saveSessionCache({
+            activeView: nextView,
+            activeToolId,
+            activePresetId,
+            pdfSubTool,
+            editorState: cached?.editorState,
+          });
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         editorMode={editorMode}

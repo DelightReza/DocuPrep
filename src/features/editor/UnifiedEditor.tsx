@@ -1,3 +1,4 @@
+import { saveSessionCache, loadSessionCache } from '../../lib/storage/cacheStorage';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Upload,
@@ -263,6 +264,25 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
           updateCropRectForAspect(presetRatio, img);
         }
         setCropActive(false);
+        saveSessionCache({
+          activeView: 'editor',
+          activeToolId: initialTool,
+          activePresetId: activePreset?.id,
+          editorState: {
+            originalDataUrl: dataUrl,
+            filename: file.name,
+            originalSizeKb: Number((file.size / 1024).toFixed(1)),
+            unit: 'px',
+            widthVal: img.naturalWidth,
+            heightVal: img.naturalHeight,
+            dpi: 300,
+            outputFormat,
+            quality,
+            targetMaxKb,
+            customFilename: file.name.replace(/\.[^/.]+$/, '') + '_docuprep',
+            activePresetId: activePreset?.id,
+          },
+        });
       };
       img.src = dataUrl;
     };
@@ -279,6 +299,35 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
       })
       .catch((error) => console.error('Failed to open generated image:', error));
   }, [initialImage]);
+
+    // Restore cached image and parameters (preserved across refreshes for 15 mins)
+  useEffect(() => {
+    if (sourceImage || initialImage) return;
+    const cached = loadSessionCache();
+    if (cached && cached.editorState?.originalDataUrl) {
+      const state = cached.editorState;
+      const img = new Image();
+      img.onload = () => {
+        setSourceImage(img);
+        setOriginalDataUrl(state.originalDataUrl!);
+        if (state.originalSizeKb) setOriginalSizeKb(state.originalSizeKb);
+        if (state.filename) setSourceFile(new File([], state.filename));
+        if (state.customFilename) setCustomFilename(state.customFilename);
+        if (state.unit) setUnit(state.unit as any);
+        if (state.widthVal) setWidthVal(state.widthVal);
+        if (state.heightVal) setHeightVal(state.heightVal);
+        if (state.dpi) setDpi(state.dpi);
+        if (state.outputFormat) setOutputFormat(state.outputFormat as any);
+        if (state.quality) setQuality(state.quality);
+        if (state.targetMaxKb !== undefined) setTargetMaxKb(state.targetMaxKb);
+        if (state.activePresetId) {
+          const p = getAllPresets().find((item) => item.id === state.activePresetId);
+          if (p) setActivePreset(p);
+        }
+      };
+      img.src = state.originalDataUrl;
+    }
+  }, []);
 
   // Fixed aspect ratio crop updater
   const updateCropRectForAspect = (targetRatio: number | null, img: HTMLImageElement) => {
@@ -610,6 +659,44 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
     }
   }, [sourceImage, renderCurrentState]);
 
+  // Keep session cache updated with latest parameters
+  useEffect(() => {
+    if (!originalDataUrl) return;
+    saveSessionCache({
+      activeView: 'editor',
+      activeToolId: initialTool,
+      activePresetId: activePreset?.id,
+      editorState: {
+        originalDataUrl,
+        filename: sourceFile?.name || 'document',
+        originalSizeKb,
+        unit,
+        widthVal,
+        heightVal,
+        dpi,
+        outputFormat,
+        quality,
+        targetMaxKb,
+        customFilename,
+        activePresetId: activePreset?.id,
+      },
+    });
+  }, [
+    originalDataUrl,
+    unit,
+    widthVal,
+    heightVal,
+    dpi,
+    outputFormat,
+    quality,
+    targetMaxKb,
+    customFilename,
+    activePreset,
+    initialTool,
+    sourceFile,
+    originalSizeKb,
+  ]);
+
   // Aspect Ratio lock recalculation
   const handleWidthChange = (val: number) => {
     setWidthVal(val);
@@ -810,13 +897,7 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
 
         {/* Quick Launch Shortcuts */}
         <div className="flex items-center gap-2 flex-wrap">
-          <button
-            onClick={onOpenSignaturePad}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm"
-          >
-            <PenTool className="h-3.5 w-3.5 text-indigo-500" />
-            <span>Draw Signature</span>
-          </button>
+          
 
           <button
             onClick={() => {
@@ -1527,6 +1608,9 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
               value={activePreset?.id || 'original'}
               onChange={(e) => {
                 const p = getAllPresets().find((item) => item.id === e.target.value);
+                if (p) {
+                  applyPreset(p);
+                }
               }}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs font-medium text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:border-indigo-500"
             >

@@ -1101,7 +1101,7 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
                       {
                         id: 'extreme' as const,
                         title: 'Extreme Compression',
-                        desc: 'Maximum reduction for strict government portals with < 100-200 KB limits.',
+                        desc: 'Maximum reduction for strict government portals and upload limits.',
                       },
                       {
                         id: 'low' as const,
@@ -1184,30 +1184,7 @@ export const PdfWorkspace: React.FC<PdfWorkspaceProps> = ({
                     )}
                   </div>
 
-                  {/* Quick Preset Buttons */}
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-1">
-                    {[
-                      { label: '< 100 KB (Govt Portals)', val: 100 },
-                      { label: '< 200 KB (State PSC / SSC)', val: 200 },
-                      { label: '< 300 KB (UPSC OTR)', val: 300 },
-                      { label: '< 500 KB (Job Applications)', val: 500 },
-                      { label: '< 1 MB (Email Attachments)', val: 1000 },
-                    ].map((item, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => setCompressTargetKb(item.val)}
-                        className={`py-2 px-2 rounded-xl border text-xs font-semibold truncate transition ${
-                          compressTargetKb === item.val
-                            ? 'border-indigo-600 bg-indigo-600 text-white shadow-sm'
-                            : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
-                        }`}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                                  </div>
 
                 {/* Action Button */}
                 <div className="pt-2">

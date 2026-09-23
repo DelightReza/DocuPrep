@@ -106,7 +106,7 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button onClick={() => onSelectTool('compress')} className="hover:text-indigo-600 dark:hover:text-indigo-400">
-                  Target File Size Compressor (&lt;20KB, &lt;50KB)
+                  Target File Size Compressor
                 </button>
               </li>
             </ul>

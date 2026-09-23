@@ -269,42 +269,38 @@ export async function compressPdf(
   let dpiScale = 1.4;
   let jpegQuality = 0.70;
 
-  if (options.level === 'extreme') {
-    // Aggressive compression for strict < 100-200 KB government limits
+  if (options.targetMaxKb && options.targetMaxKb > 0) {
+    // When targetMaxKb is specified, calculate per-page budget to tune file size right around the target
+    const budgetPerPage = (options.targetMaxKb * 0.95) / Math.max(1, numPages);
+
+    if (budgetPerPage < 35) {
+      dpiScale = 0.95;
+      jpegQuality = 0.45;
+    } else if (budgetPerPage < 70) {
+      dpiScale = 1.2;
+      jpegQuality = 0.60;
+    } else if (budgetPerPage < 150) {
+      dpiScale = 1.45;
+      jpegQuality = 0.72;
+    } else if (budgetPerPage < 300) {
+      dpiScale = 1.75;
+      jpegQuality = 0.82;
+    } else {
+      dpiScale = 2.1;
+      jpegQuality = 0.88;
+    }
+  } else if (options.level === 'extreme') {
     dpiScale = 1.1;
     jpegQuality = 0.50;
   } else if (options.level === 'recommended') {
-    // Balanced compression: crisp 100 DPI readability, 60-80% file reduction
     dpiScale = 1.45;
     jpegQuality = 0.70;
   } else if (options.level === 'low') {
-    // High clarity, light compression
     dpiScale = 1.85;
     jpegQuality = 0.82;
   } else if (options.level === 'custom') {
-    if (options.targetMaxKb && options.targetMaxKb > 0) {
-      const budgetPerPage = (options.targetMaxKb * 0.9) / Math.max(1, numPages);
-
-      if (budgetPerPage < 35) {
-        dpiScale = 0.95;
-        jpegQuality = 0.42;
-      } else if (budgetPerPage < 70) {
-        dpiScale = 1.15;
-        jpegQuality = 0.55;
-      } else if (budgetPerPage < 150) {
-        dpiScale = 1.4;
-        jpegQuality = 0.68;
-      } else if (budgetPerPage < 300) {
-        dpiScale = 1.7;
-        jpegQuality = 0.78;
-      } else {
-        dpiScale = 2.0;
-        jpegQuality = 0.85;
-      }
-    } else {
-      if (options.customDpi) dpiScale = options.customDpi / 72;
-      if (options.customQuality) jpegQuality = Math.max(0.1, Math.min(1.0, options.customQuality / 100));
-    }
+    if (options.customDpi) dpiScale = options.customDpi / 72;
+    if (options.customQuality) jpegQuality = Math.max(0.1, Math.min(1.0, options.customQuality / 100));
   }
 
   const newPdfDoc = await PDFDocument.create();

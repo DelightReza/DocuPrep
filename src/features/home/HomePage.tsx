@@ -73,13 +73,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <span>Explore PDF Suite</span>
             </button>
 
-            <button
-              onClick={onOpenSignaturePad}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white/75 dark:bg-slate-900/75 text-slate-800 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-800 px-6 py-3.5 text-sm font-bold shadow-sm transition"
-            >
-              <PenTool className="h-4 w-4 text-blue-500" />
-              <span>Draw Signature</span>
-            </button>
+            
           </div>
 
           {/* Quick Metrics Bar */}
@@ -89,7 +83,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <div className="text-xs text-slate-500">Passports, Visas, PDFs & Forms</div>
             </div>
             <div>
-              <div className="text-xl font-black text-slate-900 dark:text-white">&lt; 20-50 KB</div>
+              <div className="text-xl font-black text-slate-900 dark:text-white">Target KB</div>
               <div className="text-xs text-slate-500">Smart Target Size Compressor</div>
             </div>
             <div>
@@ -301,7 +295,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <FileArchive className="h-6 w-6" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-rose-600 transition-colors">
-                  Target KB Compressor (&lt; 20KB / 50KB)
+                  Target KB Compressor
                 </h3>
                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                   Binary search optimization hits your portal's exact file size constraint without turning text or faces into blurry artifacts.
@@ -344,7 +338,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     Compress PDF
                   </div>
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400">
-                    &lt; 200 KB
+                    Smart Compress
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
