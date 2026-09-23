@@ -19,7 +19,6 @@ import {
   Undo2,
   RefreshCw,
   Grid,
-  Bot,
   Layers,
   ChevronRight,
   Info,
@@ -135,9 +134,9 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
   const [currentKb, setCurrentKb] = useState<number>(0);
   const [targetAchieved, setTargetAchieved] = useState<boolean>(true);
 
-  // AI Compliance Inspection state
-  const [aiReport, setAiReport] = useState<ComplianceReport | null>(null);
-  const [isAiAnalyzing, setIsAiAnalyzing] = useState<boolean>(false);
+  // Document Specification Compliance Inspection state
+  const [specReport, setSpecReport] = useState<ComplianceReport | null>(null);
+  const [isSpecChecking, setIsSpecChecking] = useState<boolean>(false);
 
   // Preview & Drag State
   const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null);
@@ -725,8 +724,8 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
   // Biometric & Document Compliance Check (100% In-Browser)
   const handleComplianceCheck = async () => {
     if (!outputCanvasRef.current) return;
-    setIsAiAnalyzing(true);
-    setAiReport(null);
+    setIsSpecChecking(true);
+    setSpecReport(null);
 
     // Brief processing delay for smooth UI feedback
     await new Promise((r) => setTimeout(r, 260));
@@ -853,7 +852,7 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
           ? 'Requires Minor Adjustments'
           : 'Non-Compliant / Retake Recommended';
 
-      setAiReport({
+      setSpecReport({
         complianceScore: Math.max(score, 50),
         verdict,
         summary: score >= 90
@@ -865,7 +864,7 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
     } catch (err) {
       console.error('Compliance check error:', err);
     } finally {
-      setIsAiAnalyzing(false);
+      setIsSpecChecking(false);
     }
   };
 
@@ -1530,25 +1529,34 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
             </div>
           )}
 
-          {/* AI Compliance Report Display */}
-          {aiReport && (
+          {/* Document Specification Compliance Report Display */}
+          {specReport && (
             <div className="p-4 rounded-xl border border-indigo-200 dark:border-indigo-900/50 bg-indigo-50/50 dark:bg-indigo-950/20 space-y-3 animate-fade-in">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Bot className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                  <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                   <span className="text-xs font-bold text-slate-900 dark:text-white">
-                    AI Official Spec Inspection
+                    Official Spec Verification
                   </span>
                 </div>
-                <span className="rounded-full bg-indigo-600 text-white px-2 py-0.5 text-[10px] font-bold">
-                  Score: {aiReport.complianceScore}%
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-emerald-600 text-white px-2 py-0.5 text-[10px] font-bold">
+                    Score: {specReport.complianceScore}%
+                  </span>
+                  <button
+                    onClick={() => setSpecReport(null)}
+                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs px-1 font-bold"
+                    title="Dismiss Report"
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-300">
-                {aiReport.summary}
+                {specReport.summary}
               </p>
               <div className="space-y-1.5">
-                {aiReport.checks.map((c, i) => (
+                {specReport.checks.map((c, i) => (
                   <div key={i} className="flex items-center justify-between text-[11px] py-1 border-t border-indigo-100 dark:border-indigo-900/40">
                     <span className="font-medium text-slate-700 dark:text-slate-300">{c.category}</span>
                     <span
@@ -2012,11 +2020,11 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={handleComplianceCheck}
-                disabled={!sourceImage || isAiAnalyzing}
+                disabled={!sourceImage || isSpecChecking}
                 className="flex items-center justify-center gap-1.5 py-3 px-3 rounded-xl border border-indigo-300 dark:border-indigo-800 bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 text-xs font-semibold hover:bg-indigo-50 shadow-sm disabled:opacity-40"
               >
                 <ShieldCheck className="h-4 w-4" />
-                <span>{isAiAnalyzing ? 'Checking...' : 'Spec Check'}</span>
+                <span>{isSpecChecking ? 'Checking...' : 'Spec Check'}</span>
               </button>
 
               <button
