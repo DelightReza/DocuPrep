@@ -1215,7 +1215,7 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
                       )}
                     </div>
                     <div className="mt-2 text-[11px] text-indigo-600 dark:text-indigo-400 font-mono text-center font-medium">
-                      {calculatePixels(widthVal, unit, dpi)} × {calculatePixels(heightVal, unit, dpi)} px ({fitMode === 'cover' ? 'Fill & Crop' : 'Fit & Pad'})
+                      {calculatePixels(widthVal, unit, dpi)} × {calculatePixels(heightVal, unit, dpi)} px
                     </div>
                   </div>
                 </div>
@@ -1267,9 +1267,9 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
                       </span>
                     </div>
                     <div className="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800">
-                      <span className="text-[10px] text-slate-400 block">Anti-Stretch</span>
-                      <span className="font-semibold text-indigo-600 dark:text-indigo-400">
-                        {fitMode === 'cover' ? 'Fill & Crop' : 'Fit & Pad'}
+                      <span className="text-[10px] text-slate-400 block">DPI</span>
+                      <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                        {dpi}
                       </span>
                     </div>
                   </div>
@@ -1746,56 +1746,6 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
                 </select>
               </div>
             </div>
-
-            {/* Fit & Crop Mode (Anti-Stretch Architecture) */}
-            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                  Fit & Crop Mode
-                </span>
-                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
-                  <Check className="h-3 w-3" />
-                  Zero Stretch Guarantee
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setFitMode('cover')}
-                  className={`p-2.5 rounded-xl border text-left transition flex flex-col gap-1 ${
-                    fitMode === 'cover'
-                      ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-200 shadow-sm'
-                      : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold">Fill Size & Crop</span>
-                    {fitMode === 'cover' && <Check className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />}
-                  </div>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
-                    Fills whole frame proportionally. Center-crops excess margins without stretching.
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setFitMode('contain')}
-                  className={`p-2.5 rounded-xl border text-left transition flex flex-col gap-1 ${
-                    fitMode === 'contain'
-                      ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-200 shadow-sm'
-                      : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold">Fit Size & Pad</span>
-                    {fitMode === 'contain' && <Check className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />}
-                  </div>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
-                    Fits whole photo into frame. Pads letterbox with background color. No distortion.
-                  </span>
-                </button>
-              </div>
-            </div>
           </div>
           )}
 
@@ -2030,12 +1980,6 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
                     <span className="text-slate-500 text-[11px]">Resolution:</span>
                     <span className="font-mono text-slate-700 dark:text-slate-300 text-[11px]">
                       {calculatePixels(widthVal, unit, dpi)} × {calculatePixels(heightVal, unit, dpi)} px
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-500 text-[11px]">Mode:</span>
-                    <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-[11px]">
-                      {fitMode === 'cover' ? 'Fill & Crop' : 'Fit & Pad'}
                     </span>
                   </div>
                   {targetMaxKb && (
