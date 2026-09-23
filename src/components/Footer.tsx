@@ -151,7 +151,7 @@ export const Footer: React.FC<FooterProps> = ({
         <div className="mt-10 border-t border-slate-200 pt-6 dark:border-slate-800">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-[11px] text-slate-500 dark:text-slate-400 text-center sm:text-left leading-relaxed">
-              <strong>Disclaimer:</strong> DocuPrep is an independent document utility platform and is not affiliated with, endorsed by, or sponsored by any government agency, examination authority (such as UPSC, SSC, IBPS, NTA, GATE), passport authority, or visa issuing embassy unless explicitly stated. All trademarks belong to their respective holders.
+              <strong>Disclaimer:</strong> DocuPrep is an independent document utility platform and is not affiliated with, endorsed by, or sponsored by any government agency, examination authority, passport authority, or visa issuing embassy unless explicitly stated. All trademarks belong to their respective holders.
             </p>
             <button
               onClick={onOpenAbout}
