@@ -9,7 +9,28 @@ export default defineConfig(() => {
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, '.'),
+        '@': path.resolve(import.meta.dirname, '.'),
+      },
+    },
+    build: {
+      chunkSizeWarningLimit: 1000,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules/pdfjs-dist') || id.includes('node_modules/pdf-lib')) {
+              return 'pdf-engine';
+            }
+            if (id.includes('node_modules/jszip')) {
+              return 'zip-engine';
+            }
+            if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+              return 'react-vendor';
+            }
+            if (id.includes('node_modules/lucide-react') || id.includes('node_modules/motion')) {
+              return 'ui-vendor';
+            }
+          },
+        },
       },
     },
     server: {
