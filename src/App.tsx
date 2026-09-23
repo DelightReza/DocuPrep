@@ -53,7 +53,20 @@ export default function App() {
   } | null>(null);
 
   // Settings & Theme
-  const [editorMode, setEditorMode] = useState<'simple' | 'advanced'>('advanced');
+  const [editorMode, setEditorMode] = useState<'simple' | 'advanced'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('docuprep_editor_mode');
+      if (saved === 'simple' || saved === 'advanced') {
+        return saved;
+      }
+    }
+    return 'simple';
+  });
+
+  const handleToggleEditorMode = (mode: 'simple' | 'advanced') => {
+    setEditorMode(mode);
+    localStorage.setItem('docuprep_editor_mode', mode);
+  };
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('docuprep_theme');
@@ -112,8 +125,10 @@ export default function App() {
 
   const handleConfirmClearWorkspace = () => {
     localStorage.removeItem('docuprep_custom_presets_v1');
+    localStorage.removeItem('docuprep_editor_mode');
     clearSessionCache();
     setPendingEditorImage(null);
+    setEditorMode('simple');
     setActiveView('home');
     setIsClearConfirmOpen(false);
     setIsSettingsOpen(false);
@@ -152,7 +167,7 @@ export default function App() {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         editorMode={editorMode}
-        onToggleMode={(mode) => setEditorMode(mode)}
+        onToggleMode={handleToggleEditorMode}
         darkMode={isDark}
         onToggleDarkMode={() => setIsDark(!isDark)}
         onOpenSettings={() => setIsSettingsOpen(true)}
@@ -227,7 +242,7 @@ export default function App() {
         darkMode={isDark}
         onToggleDarkMode={() => setIsDark(!isDark)}
         editorMode={editorMode}
-        onToggleMode={(mode) => setEditorMode(mode)}
+        onToggleMode={handleToggleEditorMode}
         onClearWorkspace={handleRequestClearWorkspace}
       />
 
