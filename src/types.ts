@@ -112,20 +112,6 @@ export interface EditorSettings {
   selectedPresetId: string | null;
 }
 
-export interface ComplianceCheckItem {
-  category: string;
-  status: 'PASS' | 'WARN' | 'FAIL';
-  details: string;
-}
-
-export interface ComplianceReport {
-  complianceScore: number; // 0 - 100
-  verdict: string;
-  summary: string;
-  checks: ComplianceCheckItem[];
-  actionableTips: string[];
-}
-
 export interface HistoryState {
   adjustments: ImageAdjustments;
   cropArea: CropArea | null;

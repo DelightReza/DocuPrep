@@ -22,7 +22,6 @@ import {
   Layers,
   ChevronRight,
   Info,
-  ShieldCheck,
   Camera,
   Eye,
   Lock,
@@ -41,8 +40,7 @@ import {
   ResizeFitMode,
   ImageAdjustments,
   CropArea,
-  EditorSettings,
-  ComplianceReport
+  EditorSettings
 } from '../../types';
 import { BUILT_IN_PRESETS, getAllPresets, ORIGINAL_DIMENSIONS_PRESET, getPresetAspectRatioDisplay } from '../../config/presets';
 import { calculatePixels, pixelsToPhysicalUnit, renderResizedCanvas } from '../../lib/image/resizeEngine';
@@ -132,10 +130,6 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
   const [renderedBlob, setRenderedBlob] = useState<Blob | null>(null);
   const [currentKb, setCurrentKb] = useState<number>(0);
   const [targetAchieved, setTargetAchieved] = useState<boolean>(true);
-
-  // Document Specification Compliance Inspection state
-  const [specReport, setSpecReport] = useState<ComplianceReport | null>(null);
-  const [isSpecChecking, setIsSpecChecking] = useState<boolean>(false);
 
   // Preview & Drag State
   const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null);
@@ -711,153 +705,6 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  };
-
-  // Biometric & Document Compliance Check (100% In-Browser)
-  const handleComplianceCheck = async () => {
-    if (!outputCanvasRef.current) return;
-    setIsSpecChecking(true);
-    setSpecReport(null);
-
-    // Brief processing delay for smooth UI feedback
-    await new Promise((r) => setTimeout(r, 260));
-
-    try {
-      const canvas = outputCanvasRef.current;
-      const ctx = canvas.getContext('2d');
-      const checks: Array<{ category: string; status: 'PASS' | 'WARN' | 'FAIL'; details: string }> = [];
-      const tips: string[] = [];
-      let score = 100;
-
-      // 1. Resolution & DPI check
-      if (dpi >= 300) {
-        checks.push({
-          category: 'Resolution & DPI',
-          status: 'PASS',
-          details: `High print-ready resolution at ${dpi} DPI (Standard: 300 DPI).`,
-        });
-      } else if (dpi >= 200) {
-        checks.push({
-          category: 'Resolution & DPI',
-          status: 'PASS',
-          details: `Acceptable digital portal resolution at ${dpi} DPI.`,
-        });
-      } else {
-        score -= 15;
-        checks.push({
-          category: 'Resolution & DPI',
-          status: 'WARN',
-          details: `Current ${dpi} DPI is below recommended 300 DPI for official printing.`,
-        });
-        tips.push('Increase DPI to 200 or 300 in the Resolution settings for crisp text on portal submissions.');
-      }
-
-      // 2. Geometry & Aspect Ratio
-      const targetRatio = widthVal / heightVal;
-      const currentRatio = canvas.width / canvas.height;
-      const ratioDiff = Math.abs(targetRatio - currentRatio);
-      if (ratioDiff < 0.05) {
-        checks.push({
-          category: 'Dimensions & Geometry',
-          status: 'PASS',
-          details: `Exact ${widthVal} x ${heightVal} ${unit} (${canvas.width} x ${canvas.height} px) verified.`,
-        });
-      } else {
-        score -= 20;
-        checks.push({
-          category: 'Dimensions & Geometry',
-          status: 'WARN',
-          details: `Aspect ratio differs slightly from target ${widthVal}x${heightVal} ${unit}.`,
-        });
-        tips.push('Use the aspect-locked crop tool to match required portal dimensions.');
-      }
-
-      // 3. File Size constraint
-      if (targetMaxKb) {
-        if (currentKb <= targetMaxKb) {
-          checks.push({
-            category: 'File Size Limit',
-            status: 'PASS',
-            details: `${currentKb} KB is within target maximum limit of ${targetMaxKb} KB.`,
-          });
-        } else {
-          score -= 25;
-          checks.push({
-            category: 'File Size Limit',
-            status: 'FAIL',
-            details: `${currentKb} KB exceeds maximum allowed size of ${targetMaxKb} KB.`,
-          });
-          tips.push(`Use the Target File Size control to compress under ${targetMaxKb} KB.`);
-        }
-      } else {
-        checks.push({
-          category: 'File Size',
-          status: 'PASS',
-          details: `Output size: ${currentKb} KB.`,
-        });
-      }
-
-      // 4. Background Uniformity Check via 4 corners
-      if (ctx) {
-        const p1 = ctx.getImageData(4, 4, 1, 1).data;
-        const p2 = ctx.getImageData(Math.max(0, canvas.width - 5), 4, 1, 1).data;
-        const p3 = ctx.getImageData(4, Math.max(0, canvas.height - 5), 1, 1).data;
-        const p4 = ctx.getImageData(Math.max(0, canvas.width - 5), Math.max(0, canvas.height - 5), 1, 1).data;
-
-        const avgR = (p1[0] + p2[0] + p3[0] + p4[0]) / 4;
-        const avgG = (p1[1] + p2[1] + p3[1] + p4[1]) / 4;
-        const avgB = (p1[2] + p2[2] + p3[2] + p4[2]) / 4;
-        const diff = Math.max(
-          Math.abs(p1[0] - avgR), Math.abs(p2[0] - avgR),
-          Math.abs(p1[1] - avgG), Math.abs(p2[1] - avgG),
-          Math.abs(p1[2] - avgB), Math.abs(p2[2] - avgB)
-        );
-
-        const isLight = (avgR + avgG + avgB) / 3 > 175;
-        if (diff < 35 && isLight) {
-          checks.push({
-            category: 'Background Uniformity',
-            status: 'PASS',
-            details: 'Solid, uniform light background detected along perimeter.',
-          });
-        } else if (diff < 45) {
-          checks.push({
-            category: 'Background Uniformity',
-            status: 'PASS',
-            details: 'Uniform background detected.',
-          });
-        } else {
-          score -= 15;
-          checks.push({
-            category: 'Background Uniformity',
-            status: 'WARN',
-            details: 'Uneven background or shadows detected along outer borders.',
-          });
-          tips.push('Use the Background tool to replace background with pure white or light solid color.');
-        }
-      }
-
-      const verdict: 'Likely Compliant' | 'Requires Minor Adjustments' | 'Non-Compliant / Retake Recommended' =
-        score >= 90
-          ? 'Likely Compliant'
-          : score >= 70
-          ? 'Requires Minor Adjustments'
-          : 'Non-Compliant / Retake Recommended';
-
-      setSpecReport({
-        complianceScore: Math.max(score, 50),
-        verdict,
-        summary: score >= 90
-          ? 'Image meets official dimensions, resolution, and background uniformity standards.'
-          : 'Document matches most requirements but could benefit from minor adjustments before submission.',
-        checks,
-        actionableTips: tips.length > 0 ? tips : ['Lighting is balanced. Photo is ready for official upload.'],
-      });
-    } catch (err) {
-      console.error('Compliance check error:', err);
-    } finally {
-      setIsSpecChecking(false);
-    }
   };
 
   return (
@@ -1497,53 +1344,6 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
               )}
             </div>
           )}
-
-          {/* Document Specification Compliance Report Display */}
-          {specReport && (
-            <div className="p-4 rounded-xl border border-indigo-200 dark:border-indigo-900/50 bg-indigo-50/50 dark:bg-indigo-950/20 space-y-3 animate-fade-in">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                  <span className="text-xs font-bold text-slate-900 dark:text-white">
-                    Official Spec Verification
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-emerald-600 text-white px-2 py-0.5 text-[10px] font-bold">
-                    Score: {specReport.complianceScore}%
-                  </span>
-                  <button
-                    onClick={() => setSpecReport(null)}
-                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs px-1 font-bold"
-                    title="Dismiss Report"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-              <p className="text-xs text-slate-600 dark:text-slate-300">
-                {specReport.summary}
-              </p>
-              <div className="space-y-1.5">
-                {specReport.checks.map((c, i) => (
-                  <div key={i} className="flex items-center justify-between text-[11px] py-1 border-t border-indigo-100 dark:border-indigo-900/40">
-                    <span className="font-medium text-slate-700 dark:text-slate-300">{c.category}</span>
-                    <span
-                      className={`font-semibold ${
-                        c.status === 'PASS'
-                          ? 'text-emerald-600'
-                          : c.status === 'WARN'
-                          ? 'text-amber-500'
-                          : 'text-red-500'
-                      }`}
-                    >
-                      {c.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Right Column: Editing & Specification Controls */}
@@ -1947,23 +1747,14 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={handleComplianceCheck}
-                disabled={!sourceImage || isSpecChecking}
-                className="flex items-center justify-center gap-1.5 py-3 px-3 rounded-xl border border-indigo-300 dark:border-indigo-800 bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 text-xs font-semibold hover:bg-indigo-50 shadow-sm disabled:opacity-40"
-              >
-                <ShieldCheck className="h-4 w-4" />
-                <span>{isSpecChecking ? 'Checking...' : 'Spec Check'}</span>
-              </button>
-
+            <div>
               <button
                 onClick={handleDownload}
                 disabled={!sourceImage}
-                className="flex items-center justify-center gap-1.5 py-3 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md shadow-indigo-500/20 disabled:opacity-40"
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-semibold shadow-md shadow-indigo-500/20 disabled:opacity-40 transition"
               >
                 <Download className="h-4 w-4" />
-                <span>Download Ready</span>
+                <span>Download Ready Document</span>
               </button>
             </div>
           </div>
