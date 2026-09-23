@@ -52,12 +52,12 @@ export const Footer: React.FC<FooterProps> = ({
             <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-400">
               <li>
                 <button onClick={() => onSelectTool('passport')} className="hover:text-indigo-600 dark:hover:text-indigo-400">
-                  Passport Photo Maker (2x2", 35x45mm)
+                  Passport Photo Maker
                 </button>
               </li>
               <li>
                 <button onClick={() => onSelectTool('visa')} className="hover:text-indigo-600 dark:hover:text-indigo-400">
-                  Visa Photo Creator (Schengen, US, UK)
+                  Visa Photo Creator
                 </button>
               </li>
               <li>
@@ -86,7 +86,7 @@ export const Footer: React.FC<FooterProps> = ({
             <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-400">
               <li>
                 <button onClick={() => onSelectTool('signature')} className="hover:text-indigo-600 dark:hover:text-indigo-400">
-                  Official Signature Resizer (PNG / JPG)
+                  Official Signature Resizer
                 </button>
               </li>
               <li>
