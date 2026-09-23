@@ -319,7 +319,7 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
           if (p) setActivePreset(p);
         }
       };
-      img.src = state.originalDataUrl;
+      img.src = state.originalDataUrl!;
     }
   }, []);
 
@@ -891,10 +891,6 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
 
         {/* Quick Launch Shortcuts */}
         <div className="flex items-center gap-2 flex-wrap">
-          
-
-          
-
           <button
             onClick={onOpenCustomPresetBuilder}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm"
@@ -1344,7 +1340,7 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
                 /* Standard Interactive Live Viewport with Face Guide */
                 <div
                   className={`relative flex items-center justify-center max-w-full max-h-[460px] overflow-auto rounded-xl shadow-lg border border-slate-300 dark:border-slate-700 transition-all ${
-                    showCheckerboard ? 'checkerboard-bg' : 'bg-white'
+                    showCheckerboard ? 'checkerboard-bg' : 'bg-white dark:bg-slate-900'
                   }`}
                 >
                   {/* Rendered Output Preview Image */}

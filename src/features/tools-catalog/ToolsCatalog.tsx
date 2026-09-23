@@ -37,7 +37,6 @@ const renderToolIcon = (iconName: string, className: string = 'h-5 w-5') => {
     case 'Crop': return <Crop className={className} />;
     case 'FileArchive': return <FileArchive className={className} />;
     case 'ArrowRightLeft': return <ArrowRightLeft className={className} />;
-    case 'Printer': return <Printer className={className} />;
     case 'Sparkles': return <Sparkles className={className} />;
     case 'Sliders': return <Sliders className={className} />;
     case 'UserCheck': return <UserCheck className={className} />;

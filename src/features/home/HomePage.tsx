@@ -68,8 +68,6 @@ export const HomePage: React.FC<HomePageProps> = ({
               <Files className="h-4 w-4 text-indigo-500" />
               <span>Explore PDF Suite</span>
             </button>
-
-            
           </div>
 
           {/* Quick Metrics Bar */}
