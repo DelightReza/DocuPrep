@@ -5,7 +5,6 @@ import {
   Crop,
   FileArchive,
   ArrowRightLeft,
-  Printer,
   Sparkles,
   Sliders,
   UserCheck,

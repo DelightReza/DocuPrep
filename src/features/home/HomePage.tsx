@@ -11,11 +11,9 @@ import {
   Fingerprint,
   FileArchive,
   Files,
-  Scissors,
   CheckCircle2,
   Sliders,
   Layers,
-  Printer,
   ChevronRight
 } from 'lucide-react';
 import { ToolId } from '../../types';
@@ -24,14 +22,12 @@ import { BUILT_IN_PRESETS } from '../../config/presets';
 interface HomePageProps {
   onSelectTool: (toolId: ToolId, defaultPresetId?: string) => void;
   onOpenPdfSuite: (subTool?: string) => void;
-  onOpenSignaturePad: () => void;
   onOpenPresetBuilder: () => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
   onSelectTool,
   onOpenPdfSuite,
-  onOpenSignaturePad,
   onOpenPresetBuilder,
 }) => {
   return (
@@ -51,7 +47,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </h1>
 
           <p className="mt-6 sm:mt-8 text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-xl mx-auto leading-relaxed">
-            The calm, exact way to resize photos, sign forms, tune file size, and turn scattered pages into submission-ready documents.
+            The calm, exact way to resize photos, crop uploaded signatures, hit exact target KB limits, and format documents for online forms and portals.
           </p>
 
           {/* Primary Action Buttons */}
@@ -87,8 +83,8 @@ export const HomePage: React.FC<HomePageProps> = ({
               <div className="text-xs text-slate-500">Smart Target Size Compressor</div>
             </div>
             <div>
-              <div className="text-xl font-black text-slate-900 dark:text-white">300 DPI</div>
-              <div className="text-xs text-slate-500">True Print-Ready Biometrics</div>
+              <div className="text-xl font-black text-slate-900 dark:text-white">Online Ready</div>
+              <div className="text-xs text-slate-500">Verified Portal Dimensions</div>
             </div>
             <div>
               <div className="text-xl font-black text-emerald-600 dark:text-emerald-400">0 KB Upload</div>
@@ -189,20 +185,20 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
 
               <div
-                onClick={() => onSelectTool('photo-sheet')}
+                onClick={() => onSelectTool('scanner')}
                 className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-lg hover:border-indigo-500/50 transition cursor-pointer group"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 mb-4 group-hover:scale-105 transition-transform">
-                  <Printer className="h-6 w-6" />
+                  <Sparkles className="h-6 w-6" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">
-                  Printable Photo Sheet (A4 & 4x6")
+                  Document & Marksheet Scanner
                 </h3>
                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                  Arrange 4, 6, 8, 12, or 16 passport copies on standard photo paper with automatic scissor cutting guides ready for print.
+                  Enhance certificate scans, remove shadow gradients, binarize high-contrast text, and crop documents to exact portal upload specs.
                 </p>
                 <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-blue-600 dark:text-blue-400">
-                  <span>Generate Photo Grid</span>
+                  <span>Clean Document Scan</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </div>
               </div>
@@ -354,7 +350,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   Images to PDF
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Convert multi-page certificates and photos into standard A4 or Letter PDFs.
+                  Convert multi-page certificates, marksheets, and photos into portal-compliant upload PDFs.
                 </p>
               </div>
 

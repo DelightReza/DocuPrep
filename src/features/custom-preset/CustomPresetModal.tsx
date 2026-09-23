@@ -200,7 +200,7 @@ export const CustomPresetModal: React.FC<CustomPresetModalProps> = ({
                   <option value="96">96 DPI (Web standard)</option>
                   <option value="150">150 DPI (Balanced)</option>
                   <option value="200">200 DPI (Exam portals)</option>
-                  <option value="300">300 DPI (Print standard)</option>
+                  <option value="300">300 DPI (Standard High Quality)</option>
                 </select>
               </div>
 

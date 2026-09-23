@@ -61,8 +61,8 @@ export const Footer: React.FC<FooterProps> = ({
                 </button>
               </li>
               <li>
-                <button onClick={() => onSelectTool('photo-sheet')} className="hover:text-indigo-600 dark:hover:text-indigo-400">
-                  Printable Photo Sheet (A4 / Letter Grid)
+                <button onClick={() => onSelectTool('scanner')} className="hover:text-indigo-600 dark:hover:text-indigo-400">
+                  Document & Marksheet Scanner
                 </button>
               </li>
               <li>
@@ -120,7 +120,7 @@ export const Footer: React.FC<FooterProps> = ({
             <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-400">
               <li>
                 <button onClick={() => onSelectTool('img-to-pdf')} className="hover:text-indigo-600 dark:hover:text-indigo-400">
-                  Images to PDF Converter (A4 / Letter)
+                  Images to PDF Converter
                 </button>
               </li>
               <li>

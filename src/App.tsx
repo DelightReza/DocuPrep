@@ -11,8 +11,6 @@ import { ToolsCatalog } from './features/tools-catalog/ToolsCatalog';
 import { UnifiedEditor } from './features/editor/UnifiedEditor';
 import { PdfWorkspace } from './features/pdf-tools/PdfWorkspace';
 
-import { SignaturePadModal } from './features/signature/SignaturePadModal';
-import { PhotoSheetModal } from './features/photo-sheet/PhotoSheetModal';
 import { CustomPresetModal } from './features/custom-preset/CustomPresetModal';
 import { SettingsModal } from './features/settings/SettingsModal';
 import { AboutModal } from './features/about/AboutModal';
@@ -41,13 +39,6 @@ export default function App() {
   });
 
   // Modals state
-  const [isSignaturePadOpen, setIsSignaturePadOpen] = useState(false);
-  const [isPhotoSheetOpen, setIsPhotoSheetOpen] = useState(false);
-  const [photoSheetCanvas, setPhotoSheetCanvas] = useState<HTMLCanvasElement | null>(null);
-  const [photoSheetDims, setPhotoSheetDims] = useState<{ widthMm: number; heightMm: number }>({
-    widthMm: 35,
-    heightMm: 45,
-  });
 
   const [isCustomPresetOpen, setIsCustomPresetOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -110,12 +101,6 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Launch photo sheet modal from editor
-  const handleLaunchPhotoSheet = (canvas: HTMLCanvasElement, widthMm: number, heightMm: number) => {
-    setPhotoSheetCanvas(canvas);
-    setPhotoSheetDims({ widthMm, heightMm });
-    setIsPhotoSheetOpen(true);
-  };
 
   const handleClearWorkspace = () => {
     localStorage.removeItem('docuprep_custom_presets_v1');
@@ -167,7 +152,6 @@ export default function App() {
           <HomePage
             onSelectTool={handleSelectTool}
             onOpenPdfSuite={handleOpenPdfSuite}
-            onOpenSignaturePad={() => setIsSignaturePadOpen(true)}
             onOpenPresetBuilder={() => setIsCustomPresetOpen(true)}
           />
         )}
@@ -185,8 +169,6 @@ export default function App() {
             initialPresetId={activePresetId}
             initialImage={pendingEditorImage}
             editorMode={editorMode}
-            onOpenSignaturePad={() => setIsSignaturePadOpen(true)}
-            onOpenPhotoSheet={handleLaunchPhotoSheet}
             onOpenCustomPresetBuilder={() => setIsCustomPresetOpen(true)}
           />
         )}
@@ -219,24 +201,7 @@ export default function App() {
       />
 
       {/* Modals & Drawers */}
-      <SignaturePadModal
-        isOpen={isSignaturePadOpen}
-        onClose={() => setIsSignaturePadOpen(false)}
-        onApplySignature={(canvas, filename) => {
-          setPendingEditorImage({ dataUrl: canvas.toDataURL('image/png'), filename });
-          setIsSignaturePadOpen(false);
-          setActiveToolId('signature');
-          setActiveView('editor');
-        }}
-      />
 
-      <PhotoSheetModal
-        isOpen={isPhotoSheetOpen}
-        onClose={() => setIsPhotoSheetOpen(false)}
-        sourceCanvas={photoSheetCanvas}
-        initialPhotoWidthMm={photoSheetDims.widthMm}
-        initialPhotoHeightMm={photoSheetDims.heightMm}
-      />
 
       <CustomPresetModal
         isOpen={isCustomPresetOpen}

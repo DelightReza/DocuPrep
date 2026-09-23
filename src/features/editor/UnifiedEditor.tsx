@@ -18,8 +18,6 @@ import {
   Minimize2,
   Undo2,
   RefreshCw,
-  Printer,
-  PenTool,
   Grid,
   Bot,
   Layers,
@@ -59,8 +57,6 @@ interface UnifiedEditorProps {
   initialPresetId?: string;
   initialImage?: { dataUrl: string; filename: string } | null;
   editorMode: 'simple' | 'advanced';
-  onOpenSignaturePad: () => void;
-  onOpenPhotoSheet: (canvas: HTMLCanvasElement, widthMm: number, heightMm: number) => void;
   onOpenCustomPresetBuilder: () => void;
 }
 
@@ -69,8 +65,6 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
   initialPresetId,
   initialImage,
   editorMode,
-  onOpenSignaturePad,
-  onOpenPhotoSheet,
   onOpenCustomPresetBuilder,
 }) => {
   // Source Image state
@@ -764,7 +758,7 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
           status: 'WARN',
           details: `Current ${dpi} DPI is below recommended 300 DPI for official printing.`,
         });
-        tips.push('Increase DPI to 300 in the Resolution settings for official document submissions.');
+        tips.push('Increase DPI to 200 or 300 in the Resolution settings for crisp text on portal submissions.');
       }
 
       // 2. Geometry & Aspect Ratio
@@ -899,18 +893,7 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
         <div className="flex items-center gap-2 flex-wrap">
           
 
-          <button
-            onClick={() => {
-              if (outputCanvasRef.current) {
-                onOpenPhotoSheet(outputCanvasRef.current, widthVal, heightVal);
-              }
-            }}
-            disabled={!sourceImage}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm disabled:opacity-40"
-          >
-            <Grid className="h-3.5 w-3.5 text-blue-500" />
-            <span>Print Photo Sheet (A4/Letter)</span>
-          </button>
+          
 
           <button
             onClick={onOpenCustomPresetBuilder}
@@ -1276,7 +1259,7 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
                       </span>
                     </div>
                     <div className="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800">
-                      <span className="text-[10px] text-slate-400 block">Print Size</span>
+                      <span className="text-[10px] text-slate-400 block">Physical Size</span>
                       <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
                         {widthVal} × {heightVal} {unit}
                       </span>
@@ -1746,7 +1729,7 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
                   <option value="96">96 DPI (Web Display)</option>
                   <option value="150">150 DPI (Balanced)</option>
                   <option value="200">200 DPI (Exam Portals)</option>
-                  <option value="300">300 DPI (Official Print)</option>
+                  <option value="300">300 DPI (High Quality / Portal Standard)</option>
                   <option value="600">600 DPI (Ultra Fine)</option>
                 </select>
               </div>

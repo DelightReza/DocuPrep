@@ -58,10 +58,10 @@ export const TOOLS_CATALOG: ToolItem[] = [
     id: 'dpi',
     name: 'Change DPI / PPI',
     category: 'image',
-    tagline: 'Set print resolution to 150, 200, 300, or 600 DPI',
-    description: 'Ensure your image meets strict print resolution requirements for physical ID cards and passports.',
+    tagline: 'Set resolution metadata to 150, 200, 300, or 600 DPI',
+    description: 'Ensure your image meets strict DPI resolution requirements for official application forms and exam portals.',
     acceptTypes: 'image/*',
-    iconName: 'Printer',
+    iconName: 'Sliders',
   },
   {
     id: 'background',
@@ -118,17 +118,7 @@ export const TOOLS_CATALOG: ToolItem[] = [
     defaultPresetId: 'id-card-photo-25x35',
     iconName: 'CreditCard',
   },
-  {
-    id: 'photo-sheet',
-    name: 'Printable Photo Sheet',
-    category: 'photo',
-    tagline: 'Print 4, 6, 8, 12, or 16 passport photos on A4 or 4x6" paper',
-    description: 'Generates a ready-to-print grid with scissor cut marks to print at home or pharmacy.',
-    badge: 'Print Ready',
-    acceptTypes: 'image/*',
-    popular: true,
-    iconName: 'Grid',
-  },
+  
 
   // --- APPLICATION TOOLS ---
   {
@@ -179,7 +169,7 @@ export const TOOLS_CATALOG: ToolItem[] = [
     id: 'img-to-pdf',
     name: 'Images to PDF',
     category: 'pdf',
-    tagline: 'Combine JPG & PNG documents into a single A4 / Letter PDF',
+    tagline: 'Combine JPG & PNG documents into a single upload-ready PDF',
     description: 'Select one or more images, choose page size, margins, and download an organized PDF.',
     badge: 'Universal',
     acceptTypes: 'image/*',
