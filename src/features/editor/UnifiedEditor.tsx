@@ -1458,7 +1458,10 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
                   <span>Change Image</span>
                 </button>
 
-                <label className="flex items-center gap-1.5 cursor-pointer">
+                <label
+                  className="flex items-center gap-1.5 cursor-pointer"
+                  title="Show checkered pattern behind transparent background areas (e.g., for PNG signatures or cutout portraits)"
+                >
                   <input
                     type="checkbox"
                     checked={showCheckerboard}
@@ -1466,7 +1469,7 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
                     className="rounded border-slate-300 text-indigo-600"
                   />
                   <span className="text-[11px] text-slate-600 dark:text-slate-400">
-                    Checkerboard
+                    Transparency Grid
                   </span>
                 </label>
 
@@ -1576,7 +1579,7 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
           <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-3">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                Official Requirement Preset
+                Requirement Preset
               </label>
               <button
                 onClick={onOpenCustomPresetBuilder}
