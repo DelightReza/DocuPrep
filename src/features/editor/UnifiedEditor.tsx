@@ -1,53 +1,29 @@
 import { saveSessionCache, loadSessionCache } from '../../lib/storage/cacheStorage';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
-  Upload,
-  Crop as CropIcon,
-  RotateCw,
-  FlipHorizontal,
-  FlipVertical,
-  Sliders,
-  Sparkles,
-  Download,
-  FileCheck2,
-  CheckCircle2,
-  AlertTriangle,
-  ZoomIn,
-  ZoomOut,
-  Maximize2,
-  Minimize2,
-  Undo2,
-  RefreshCw,
-  Grid,
-  Layers,
-  ChevronRight,
-  Info,
-  Camera,
-  Eye,
-  Lock,
-  Unlock,
-  Loader2,
-  Columns,
-  Scissors,
-  Check,
-  Move
-} from 'lucide-react';
-import {
   ToolId,
   PresetRequirement,
   UnitType,
   OutputFormat,
   ResizeFitMode,
   ImageAdjustments,
-  CropArea,
-  EditorSettings
 } from '../../types';
-import { BUILT_IN_PRESETS, getAllPresets, ORIGINAL_DIMENSIONS_PRESET, getPresetAspectRatioDisplay } from '../../config/presets';
-import { calculatePixels, pixelsToPhysicalUnit, renderResizedCanvas } from '../../lib/image/resizeEngine';
+import { getAllPresets, ORIGINAL_DIMENSIONS_PRESET } from '../../config/presets';
+import { calculatePixels, renderResizedCanvas } from '../../lib/image/resizeEngine';
 import { compressCanvas, CompressionResult } from '../../lib/image/compressionEngine';
 import { processBackgroundRemoval } from '../../lib/image/backgroundEngine';
 import { processSignatureOrThumb } from '../../lib/image/signatureEngine';
 import { processDocumentScan, ScanMode } from '../../lib/image/scannerEngine';
+
+import { EditorTopBar } from './components/EditorTopBar';
+import { EditorViewport } from './components/EditorViewport';
+import { CropControlBar } from './components/CropControlBar';
+import { ComplianceMetricsBar } from './components/ComplianceMetricsBar';
+import { PresetSelectorCard } from './components/PresetSelectorCard';
+import { DimensionControlsCard } from './components/DimensionControlsCard';
+import { CompressionCard } from './components/CompressionCard';
+import { AdjustmentsCard } from './components/AdjustmentsCard';
+import { ExportActionCard } from './components/ExportActionCard';
 
 interface UnifiedEditorProps {
   initialTool?: ToolId;
@@ -710,1054 +686,140 @@ export const UnifiedEditor: React.FC<UnifiedEditorProps> = ({
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 animate-fade-in">
       {/* Top Workflow Bar */}
-      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800/80 pb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-              Studio Workspace
-            </span>
-            {activePreset && (
-              <span className="rounded-full bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 border border-indigo-200/50">
-                Preset: {activePreset.name}
-              </span>
-            )}
-          </div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
-            Photo, Document & Signature Editor
-          </h2>
-        </div>
-
-        {/* Quick Launch Shortcuts */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            onClick={onOpenCustomPresetBuilder}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm"
-          >
-            <Sliders className="h-3.5 w-3.5 text-emerald-500" />
-            <span>Custom Preset</span>
-          </button>
-        </div>
-      </div>
+      <EditorTopBar
+        activePreset={activePreset}
+        onOpenCustomPresetBuilder={onOpenCustomPresetBuilder}
+      />
 
       {/* Main 2-Column Interface: Left Viewport (7 cols) + Right Controls (5 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Interactive Canvas Viewport */}
         <div className="lg:col-span-7 flex flex-col space-y-4">
-          {/* Hidden File Inputs (Always Mounted in DOM) */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onClick={(e) => {
-              (e.target as HTMLInputElement).value = '';
-            }}
-            onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
-            className="hidden"
+          <EditorViewport
+            sourceImage={sourceImage}
+            fileInputRef={fileInputRef}
+            cameraInputRef={cameraInputRef}
+            handleFileSelect={handleFileSelect}
+            viewportMode={viewportMode}
+            setViewportMode={setViewportMode}
+            cropActive={cropActive}
+            setCropActive={setCropActive}
+            cropPreset={cropPreset}
+            applyCropPreset={applyCropPreset}
+            isDragging={isDragging}
+            setIsDragging={setIsDragging}
+            originalSizeKb={originalSizeKb}
+            originalDataUrl={originalDataUrl}
+            currentKb={currentKb}
+            previewDataUrl={previewDataUrl}
+            widthVal={widthVal}
+            heightVal={heightVal}
+            unit={unit}
+            dpi={dpi}
+            zoomLevel={zoomLevel}
+            setZoomLevel={setZoomLevel}
+            activePreset={activePreset}
+            cropRect={cropRect}
+            handleCropPointerDown={handleCropPointerDown}
+            showFaceGuide={showFaceGuide}
+            setShowFaceGuide={setShowFaceGuide}
           />
-          <input
-            ref={cameraInputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            onClick={(e) => {
-              (e.target as HTMLInputElement).value = '';
-            }}
-            onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
-            className="hidden"
-          />
 
-          {/* Viewport Mode Switcher & Crop Toggle Header */}
-          {sourceImage && (
-            <div className="flex flex-wrap items-center justify-between gap-2 p-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
-              {/* View Modes */}
-              <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setViewportMode('editor')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    viewportMode === 'editor'
-                      ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-400'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  <Sliders className="h-3.5 w-3.5" />
-                  <span>Editor & Adjust</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setViewportMode('result');
-                    setCropActive(false);
-                  }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    viewportMode === 'result'
-                      ? 'bg-white text-emerald-600 shadow-sm dark:bg-slate-900 dark:text-emerald-400'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  <Eye className="h-3.5 w-3.5" />
-                  <span>Result Preview</span>
-                  {currentKb > 0 && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 font-mono font-bold">
-                      {currentKb} KB
-                    </span>
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setViewportMode('compare');
-                    setCropActive(false);
-                  }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    viewportMode === 'compare'
-                      ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-400'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  <Columns className="h-3.5 w-3.5" />
-                  <span>Compare</span>
-                </button>
-              </div>
-
-              {/* Crop & Frame Action */}
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const next = !cropActive;
-                    setCropActive(next);
-                    if (next) {
-                      setViewportMode('editor');
-                      applyCropPreset(cropPreset);
-                    }
-                  }}
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border text-xs font-semibold transition ${
-                    cropActive
-                      ? 'border-indigo-600 bg-indigo-600 text-white shadow-sm shadow-indigo-500/20'
-                      : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-indigo-400'
-                  }`}
-                >
-                  <Scissors className="h-3.5 w-3.5" />
-                  <span>{cropActive ? 'Cropping Active' : 'Crop & Frame'}</span>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Interactive Crop Controls Bar (When Crop is Active) */}
           {sourceImage && cropActive && viewportMode === 'editor' && (
-            <div className="p-3.5 rounded-2xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/60 dark:bg-indigo-950/30 space-y-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-indigo-900 dark:text-indigo-200 flex items-center gap-1.5">
-                    <CropIcon className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-                    Crop & Frame
-                  </span>
-                  {/* Fixed Aspect Ratio Badge */}
-                  {activePreset && activePreset.id !== 'original' ? (
-                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-600 text-white text-[11px] font-bold shadow-xs">
-                      <Lock className="h-3 w-3" />
-                      Fixed Ratio: {getPresetAspectRatioDisplay(activePreset)}
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-[11px] font-semibold">
-                      Original Dimensions Ratio ({sourceImage.naturalWidth}×{sourceImage.naturalHeight})
-                    </span>
-                  )}
-                </div>
-
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  {activePreset && activePreset.id !== 'original'
-                    ? `Output: ${calculatePixels(widthVal, unit, dpi)} × ${calculatePixels(heightVal, unit, dpi)} px (${widthVal}×${heightVal} ${unit})`
-                    : `Original Source: ${sourceImage.naturalWidth} × ${sourceImage.naturalHeight} px`}
-                </span>
-              </div>
-
-              {/* Crop Ratio Indicator & Explanatory Notice */}
-              {activePreset && activePreset.id !== 'original' ? (
-                <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-indigo-200/80 dark:border-indigo-900/60 text-xs">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold border border-indigo-200/60">
-                      <Lock className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-                      <span>{getPresetAspectRatioDisplay(activePreset)}</span>
-                    </div>
-                    <span className="text-slate-600 dark:text-slate-300 text-[11px]">
-                      Locked to <span className="font-semibold text-slate-900 dark:text-white">{activePreset.name}</span> specification. Position & zoom frame to fit your photo.
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={resetCropToMax}
-                    className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
-                  >
-                    Reset to Full
-                  </button>
-                </div>
-              ) : (
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const ratio = sourceImage.naturalWidth / sourceImage.naturalHeight;
-                      setCropAspect(ratio);
-                      setCropPreset('target');
-                      updateCropRectForAspect(ratio, sourceImage);
-                    }}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
-                      cropAspect !== null
-                        ? 'bg-indigo-600 text-white shadow-sm'
-                        : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-indigo-300'
-                    }`}
-                  >
-                    Original Aspect Ratio ({sourceImage.naturalWidth}:{sourceImage.naturalHeight})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCropAspect(null);
-                      setCropPreset('free');
-                    }}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
-                      cropAspect === null
-                        ? 'bg-indigo-600 text-white shadow-sm'
-                        : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-indigo-300'
-                    }`}
-                  >
-                    Freeform
-                  </button>
-                </div>
-              )}
-
-              {/* Fine Controls: Zoom, Position, Reset */}
-              <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-indigo-100 dark:border-indigo-900/40">
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400">Frame Actions:</span>
-                  <button
-                    type="button"
-                    onClick={() => adjustCropZoom(0.9)}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[11px] font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 shadow-xs"
-                    title="Zoom In on subject (shrink crop frame)"
-                  >
-                    <ZoomIn className="h-3 w-3" />
-                    Zoom In
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => adjustCropZoom(1.1)}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[11px] font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 shadow-xs"
-                    title="Zoom Out to include more of photo (expand crop frame)"
-                  >
-                    <ZoomOut className="h-3 w-3" />
-                    Zoom Out
-                  </button>
-                  <button
-                    type="button"
-                    onClick={centerCropBox}
-                    className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[11px] font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 shadow-xs"
-                  >
-                    Center Frame
-                  </button>
-                  <button
-                    type="button"
-                    onClick={resetCropToMax}
-                    className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[11px] font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 shadow-xs"
-                  >
-                    Maximize Frame
-                  </button>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setCropActive(false)}
-                  className="flex items-center gap-1 px-3 py-1 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition shadow-xs"
-                >
-                  <Check className="h-3.5 w-3.5" />
-                  <span>Done Cropping</span>
-                </button>
-              </div>
-            </div>
+            <CropControlBar
+              sourceImage={sourceImage}
+              activePreset={activePreset}
+              cropAspect={cropAspect}
+              setCropAspect={setCropAspect}
+              setCropPreset={setCropPreset}
+              updateCropRectForAspect={updateCropRectForAspect}
+              adjustCropZoom={adjustCropZoom}
+              centerCropBox={centerCropBox}
+              resetCropToMax={resetCropToMax}
+              setCropActive={setCropActive}
+              widthVal={widthVal}
+              heightVal={heightVal}
+              unit={unit}
+              dpi={dpi}
+            />
           )}
 
-          {/* Canvas & Preview Wrapper */}
-          <div
-            onDragOver={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setIsDragging(true);
-            }}
-            onDragLeave={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setIsDragging(false);
-            }}
-            onDrop={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setIsDragging(false);
-              const file = e.dataTransfer.files?.[0];
-              if (file && (file.type.startsWith('image/') || /\.(jpe?g|png|webp)$/i.test(file.name))) {
-                handleFileSelect(file);
-              }
-            }}
-            className={`relative flex flex-col items-center justify-center min-h-[420px] sm:min-h-[500px] rounded-2xl border-2 transition-all p-4 overflow-hidden shadow-inner ${
-              isDragging
-                ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30'
-                : 'border-slate-200 dark:border-slate-800 bg-slate-100/80 dark:bg-slate-950'
-            }`}
-          >
-            {sourceImage ? (
-              viewportMode === 'compare' ? (
-                /* Compare View: Side-by-side Before & After */
-                <div className="w-full flex flex-col md:flex-row items-center justify-center gap-4 p-2">
-                  {/* Before: Original */}
-                  <div className="flex-1 flex flex-col items-center p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm max-w-sm w-full">
-                    <div className="flex items-center justify-between w-full mb-2">
-                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Original Upload</span>
-                      <span className="text-[11px] font-mono text-slate-500">{originalSizeKb} KB</span>
-                    </div>
-                    <div className="w-full h-52 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
-                      <img
-                        src={originalDataUrl || sourceImage.src}
-                        alt="Original"
-                        className="max-h-full max-w-full object-contain"
-                      />
-                    </div>
-                    <div className="mt-2 text-[11px] text-slate-500 font-mono text-center">
-                      {sourceImage.naturalWidth} × {sourceImage.naturalHeight} px
-                    </div>
-                  </div>
-
-                  {/* After: Processed Result */}
-                  <div className="flex-1 flex flex-col items-center p-3 rounded-xl border-2 border-indigo-500/40 bg-white dark:bg-slate-900 shadow-md max-w-sm w-full">
-                    <div className="flex items-center justify-between w-full mb-2">
-                      <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
-                        <Check className="h-3.5 w-3.5" />
-                        Final Result (Anti-Stretch)
-                      </span>
-                      <span className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                        {currentKb} KB
-                      </span>
-                    </div>
-                    <div className="w-full h-52 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden border border-indigo-200 dark:border-indigo-900">
-                      {previewDataUrl ? (
-                        <img
-                          src={previewDataUrl}
-                          alt="Result Preview"
-                          className="max-h-full max-w-full object-contain"
-                        />
-                      ) : (
-                        <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
-                      )}
-                    </div>
-                    <div className="mt-2 text-[11px] text-indigo-600 dark:text-indigo-400 font-mono text-center font-medium">
-                      {calculatePixels(widthVal, unit, dpi)} × {calculatePixels(heightVal, unit, dpi)} px
-                    </div>
-                  </div>
-                </div>
-              ) : viewportMode === 'result' ? (
-                /* Dedicated Result Preview View */
-                <div className="w-full flex flex-col items-center space-y-4">
-                  <div className="relative flex items-center justify-center max-w-full max-h-[440px] overflow-auto rounded-xl shadow-xl border-2 border-emerald-500/30 transition-all bg-white dark:bg-slate-900">
-                    {previewDataUrl ? (
-                      <img
-                        src={previewDataUrl}
-                        alt="Final Result Preview"
-                        style={{
-                          transform: `scale(${zoomLevel})`,
-                          transformOrigin: 'center center',
-                          transition: 'transform 0.15s ease-out',
-                        }}
-                        className="max-h-[400px] w-auto h-auto object-contain block select-none pointer-events-none"
-                      />
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-20 px-12 text-slate-400">
-                        <Loader2 className="h-8 w-8 animate-spin text-indigo-500 mb-2" />
-                        <span className="text-xs font-medium">Rendering final document...</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Document Verification & Quality Specs Strip */}
-                  <div className="w-full max-w-lg p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 shadow-sm backdrop-blur text-xs grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                    <div className="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800">
-                      <span className="text-[10px] text-slate-400 block">Pixels</span>
-                      <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
-                        {calculatePixels(widthVal, unit, dpi)} × {calculatePixels(heightVal, unit, dpi)}
-                      </span>
-                    </div>
-                    <div className="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800">
-                      <span className="text-[10px] text-slate-400 block">Physical Size</span>
-                      <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
-                        {widthVal} × {heightVal} {unit}
-                      </span>
-                    </div>
-                    <div className="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800">
-                      <span className="text-[10px] text-slate-400 block">File Size</span>
-                      <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                        {currentKb} KB
-                      </span>
-                    </div>
-                    <div className="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800">
-                      <span className="text-[10px] text-slate-400 block">DPI</span>
-                      <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
-                        {dpi}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ) : cropActive ? (
-                /* Crop Canvas View with Interactive Mask & Frame */
-                <div className="relative flex items-center justify-center max-w-full max-h-[460px] overflow-hidden rounded-xl shadow-lg border border-indigo-400/50 bg-slate-900 select-none">
-                  <div className="relative inline-block select-none">
-                    <img
-                      src={originalDataUrl || sourceImage.src}
-                      alt="Crop Canvas"
-                      className="max-h-[420px] max-w-full w-auto h-auto object-contain block select-none pointer-events-none"
-                    />
-
-                    {/* Draggable Crop Overlay Area */}
-                    <div
-                      onPointerDown={handleCropPointerDown}
-                      style={{
-                        position: 'absolute',
-                        left: `${cropRect.x * 100}%`,
-                        top: `${cropRect.y * 100}%`,
-                        width: `${cropRect.w * 100}%`,
-                        height: `${cropRect.h * 100}%`,
-                        boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.60)',
-                        cursor: 'move',
-                      }}
-                      className="border-2 border-white pointer-events-auto touch-none select-none transition-none shadow-2xl"
-                      title="Click and drag anywhere on this frame to reposition the crop"
-                    >
-                      {/* Rule of Thirds Grid */}
-                      <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none">
-                        <div className="border-r border-b border-white/30" />
-                        <div className="border-r border-b border-white/30" />
-                        <div className="border-b border-white/30" />
-                        <div className="border-r border-b border-white/30" />
-                        <div className="border-r border-b border-white/30" />
-                        <div className="border-b border-white/30" />
-                        <div className="border-r border-b border-white/30" />
-                        <div className="border-r border-b border-white/30" />
-                        <div />
-                      </div>
-
-                      {/* Corner Accent Brackets */}
-                      <div className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-white" />
-                      <div className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2 border-white" />
-                      <div className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-white" />
-                      <div className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-white" />
-
-                      {/* Active Dimensions & Fixed Ratio Badge */}
-                      <div className="absolute -top-7 left-0 flex items-center gap-1.5 bg-black/85 text-white font-mono text-[10px] px-2 py-0.5 rounded shadow pointer-events-none whitespace-nowrap">
-                        {activePreset && activePreset.id !== 'original' && (
-                          <Lock className="h-2.5 w-2.5 text-indigo-400" />
-                        )}
-                        <span>
-                          Crop: {Math.round(cropRect.w * sourceImage.naturalWidth)} × {Math.round(cropRect.h * sourceImage.naturalHeight)} px
-                          {activePreset && activePreset.id !== 'original' ? ` (Fixed ${getPresetAspectRatioDisplay(activePreset)})` : ''}
-                        </span>
-                      </div>
-
-                      {/* Drag Hint Indicator in Center */}
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40 hover:opacity-60 transition">
-                        <Move className="h-5 w-5 text-white drop-shadow" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                /* Standard Interactive Live Viewport with Face Guide */
-                <div className="relative flex items-center justify-center max-w-full max-h-[460px] overflow-auto rounded-xl shadow-lg border border-slate-300 dark:border-slate-700 transition-all bg-white dark:bg-slate-900">
-                  {/* Rendered Output Preview Image */}
-                  {previewDataUrl ? (
-                    <img
-                      src={previewDataUrl}
-                      alt="Document Preview"
-                      style={{
-                        transform: `scale(${zoomLevel})`,
-                        transformOrigin: 'center center',
-                        transition: 'transform 0.15s ease-out',
-                      }}
-                      className="max-h-[420px] w-auto h-auto object-contain block select-none pointer-events-none"
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-24 px-12 text-slate-400">
-                      <Loader2 className="h-8 w-8 animate-spin text-indigo-500 mb-2" />
-                      <span className="text-xs font-medium">Processing document preview...</span>
-                    </div>
-                  )}
-
-                  {/* Biometric Face Guide Overlay (Passport / Visa) */}
-                  {showFaceGuide && activePreset?.category === 'passport' && (
-                    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center border-2 border-indigo-500/30">
-                      {/* Head Oval */}
-                      <div className="w-[60%] h-[70%] rounded-full border-2 border-dashed border-indigo-500/70" />
-                      {/* Horizontal Eye-level line */}
-                      <div className="absolute top-[42%] left-0 right-0 border-b border-indigo-400/60" />
-                      {/* Vertical Center line */}
-                      <div className="absolute left-[50%] top-0 bottom-0 border-r border-indigo-400/60" />
-                      <span className="absolute bottom-2 left-2 rounded bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white">
-                        Biometric Face Guide (50-70% Crown to Chin)
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )
-            ) : (
-              /* Empty State Upload Dropzone */
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="flex flex-col items-center justify-center p-8 text-center max-w-md cursor-pointer group"
-              >
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 mb-4 group-hover:scale-105 transition-transform">
-                  <Upload className="h-8 w-8" />
-                </div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Upload Photo, Signature or Document
-                </h3>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  Drag and drop JPG, PNG, or WebP here, or click to browse. All processing happens 100% locally in your browser.
-                </p>
-
-                <div className="mt-5 flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 text-xs font-semibold shadow-md shadow-indigo-500/20"
-                  >
-                    <Upload className="h-4 w-4" />
-                    <span>Choose File</span>
-                  </button>
-                  <button
-                    onClick={() => cameraInputRef.current?.click()}
-                    className="flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-4 py-2.5 text-xs font-semibold hover:bg-slate-50"
-                  >
-                    <Camera className="h-4 w-4 text-indigo-500" />
-                    <span>Take Photo</span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Viewport Control Bar */}
-          {sourceImage && (
-            <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setZoomLevel((z) => Math.max(0.5, z - 0.25))}
-                  className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50"
-                  title="Zoom Out"
-                >
-                  <ZoomOut className="h-3.5 w-3.5" />
-                </button>
-                <span className="font-mono text-[11px] text-slate-600 dark:text-slate-300 w-12 text-center">
-                  {Math.round(zoomLevel * 100)}%
-                </span>
-                <button
-                  onClick={() => setZoomLevel((z) => Math.min(2.5, z + 0.25))}
-                  className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50"
-                  title="Zoom In"
-                >
-                  <ZoomIn className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  onClick={() => setZoomLevel(1)}
-                  className="px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 text-[10px]"
-                >
-                  Reset
-                </button>
-              </div>
-
-              {/* Toggles and Change Image Action */}
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-indigo-200 dark:border-indigo-800 bg-indigo-50/80 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-semibold text-[11px] hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition"
-                  title="Choose a different image file"
-                >
-                  <Upload className="h-3.5 w-3.5" />
-                  <span>Change Image</span>
-                </button>
-
-                {activePreset?.category === 'passport' && (
-                  <label className="flex items-center gap-1.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={showFaceGuide}
-                      onChange={(e) => setShowFaceGuide(e.target.checked)}
-                      className="rounded border-slate-300 text-indigo-600"
-                    />
-                    <span className="text-[11px] text-slate-600 dark:text-slate-400">
-                      Face Guides
-                    </span>
-                  </label>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Validation & Size Compliance Bar */}
-          {sourceImage && (
-            <div
-              className={`flex items-center justify-between p-3.5 rounded-xl border text-xs ${
-                targetAchieved
-                  ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-300'
-                  : 'border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/20 text-amber-900 dark:text-amber-300'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                {targetAchieved ? (
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-                ) : (
-                  <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-                )}
-                <div>
-                  <span className="font-bold">
-                    File Size: {currentKb} KB
-                  </span>
-                  {targetMaxKb && (
-                    <span className="ml-1 text-[11px] opacity-90">
-                      (Limit: &lt; {targetMaxKb} KB)
-                    </span>
-                  )}
-                  <span className="mx-2 opacity-50">•</span>
-                  <span className="text-[11px]">
-                    {calculatePixels(widthVal, unit, dpi)} x {calculatePixels(heightVal, unit, dpi)} px ({dpi} DPI)
-                  </span>
-                </div>
-              </div>
-
-              {!targetAchieved && (
-                <button
-                  onClick={() => {
-                    setQuality((q) => Math.max(20, q - 15));
-                  }}
-                  className="rounded-lg bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1 text-[11px] font-semibold"
-                >
-                  Compress More
-                </button>
-              )}
-            </div>
-          )}
+          <ComplianceMetricsBar
+            sourceImage={sourceImage}
+            targetAchieved={targetAchieved}
+            currentKb={currentKb}
+            targetMaxKb={targetMaxKb}
+            widthVal={widthVal}
+            heightVal={heightVal}
+            unit={unit}
+            dpi={dpi}
+            setQuality={setQuality}
+          />
         </div>
 
         {/* Right Column: Editing & Specification Controls */}
         <div className="lg:col-span-5 flex flex-col space-y-5">
-          {/* Preset Selector Card */}
-          <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                Requirement Preset
-              </label>
-              <button
-                onClick={onOpenCustomPresetBuilder}
-                className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
-              >
-                + New Preset
-              </button>
-            </div>
+          <PresetSelectorCard
+            activePreset={activePreset}
+            onSelectPreset={applyPreset}
+            onOpenCustomPresetBuilder={onOpenCustomPresetBuilder}
+            editorMode={editorMode}
+          />
 
-            <select
-              id="editor-preset-select"
-              value={activePreset?.id || 'original'}
-              onChange={(e) => {
-                const p = getAllPresets().find((item) => item.id === e.target.value);
-                if (p) {
-                  applyPreset(p);
-                }
-              }}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs font-medium text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:border-indigo-500"
-            >
-              <optgroup label="⭐ Default Natural Size">
-                <option value="original">
-                  ⭐ Original Dimensions (Default • Keep Natural Image Size)
-                </option>
-              </optgroup>
-
-              <optgroup label="📸 Standard Photo & Document Dimensions">
-                {getAllPresets()
-                  .filter((p) => p.category === 'passport')
-                  .map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} ({p.width}×{p.height} {p.unit})
-                    </option>
-                  ))}
-              </optgroup>
-
-              <optgroup label="✍️ Signatures, Biometrics & Slips">
-                {getAllPresets()
-                  .filter((p) => p.category === 'application' || p.category === 'social')
-                  .map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} ({p.width}×{p.height} {p.unit})
-                    </option>
-                  ))}
-              </optgroup>
-
-              {getAllPresets().some((p) => p.category === 'custom' && p.id !== 'original') && (
-                <optgroup label="🛠️ My Custom Presets">
-                  {getAllPresets()
-                    .filter((p) => p.category === 'custom' && p.id !== 'original')
-                    .map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} ({p.width}×{p.height} {p.unit})
-                      </option>
-                    ))}
-                </optgroup>
-              )}
-            </select>
-            {editorMode === 'simple' && (
-              <div className="rounded-xl border border-indigo-200 bg-indigo-50/70 p-3 text-xs text-indigo-800 dark:border-indigo-900/60 dark:bg-indigo-950/30 dark:text-indigo-200">
-                Simple Mode uses the selected preset automatically. Switch to Advanced Mode for manual dimensions, DPI, format, and enhancement controls.
-              </div>
-            )}
-          </div>
-
-          {/* Dimensions & Resolution Controls */}
           {editorMode === 'advanced' && (
-          <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                Dimensions & Resolution
-              </h3>
-              {activePreset?.id === 'original' && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-semibold border border-indigo-200/50">
-                  Original Source Size
-                </span>
-              )}
-            </div>
-
-            {/* Unit Selector */}
-            <div className="grid grid-cols-4 gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800">
-              {(['mm', 'cm', 'inch', 'px'] as const).map((u) => (
-                <button
-                  key={u}
-                  onClick={() => {
-                    // Convert existing dimensions to new unit
-                    const pxW = calculatePixels(widthVal, unit, dpi);
-                    const pxH = calculatePixels(heightVal, unit, dpi);
-                    setUnit(u);
-                    setWidthVal(pixelsToPhysicalUnit(pxW, u, dpi));
-                    setHeightVal(pixelsToPhysicalUnit(pxH, u, dpi));
-                  }}
-                  className={`py-1.5 rounded-lg text-xs font-semibold uppercase ${
-                    unit === u
-                      ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-900 dark:text-indigo-400'
-                      : 'text-slate-600 dark:text-slate-400'
-                  }`}
-                >
-                  {u}
-                </button>
-              ))}
-            </div>
-
-            {/* Width, Height, and Aspect Lock */}
-            <div className="flex items-center gap-3">
-              <div className="flex-1">
-                <span className="text-[11px] font-medium text-slate-500">Width ({unit})</span>
-                <input
-                  type="number"
-                  step="any"
-                  value={widthVal}
-                  onChange={(e) => handleWidthChange(parseFloat(e.target.value) || 0)}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                />
-              </div>
-
-              <button
-                onClick={() => setLockAspectRatio(!lockAspectRatio)}
-                className={`p-2 rounded-xl border mt-4 ${
-                  lockAspectRatio
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400'
-                    : 'border-slate-200 text-slate-400 dark:border-slate-700'
-                }`}
-                title="Lock / Unlock Aspect Ratio"
-              >
-                {lockAspectRatio ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
-              </button>
-
-              <div className="flex-1">
-                <span className="text-[11px] font-medium text-slate-500">Height ({unit})</span>
-                <input
-                  type="number"
-                  step="any"
-                  value={heightVal}
-                  onChange={(e) => handleHeightChange(parseFloat(e.target.value) || 0)}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                />
-              </div>
-            </div>
-
-            {/* DPI Selector & Format */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <span className="text-[11px] font-medium text-slate-500">Resolution (DPI)</span>
-                <select
-                  value={dpi}
-                  onChange={(e) => setDpi(parseInt(e.target.value, 10))}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                >
-                  <option value="96">96 DPI (Web Display)</option>
-                  <option value="150">150 DPI (Balanced)</option>
-                  <option value="200">200 DPI (Exam Portals)</option>
-                  <option value="300">300 DPI (High Quality / Portal Standard)</option>
-                  <option value="600">600 DPI (Ultra Fine)</option>
-                </select>
-              </div>
-
-              <div>
-                <span className="text-[11px] font-medium text-slate-500">Output Format</span>
-                <select
-                  value={outputFormat}
-                  onChange={(e) => setOutputFormat(e.target.value as OutputFormat)}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                >
-                  <option value="jpeg">JPEG (.jpg)</option>
-                  <option value="png">PNG (.png)</option>
-                  <option value="webp">WebP (.webp)</option>
-                </select>
-              </div>
-            </div>
-          </div>
+            <DimensionControlsCard
+              unit={unit}
+              setUnit={setUnit}
+              widthVal={widthVal}
+              heightVal={heightVal}
+              setWidthVal={setWidthVal}
+              setHeightVal={setHeightVal}
+              handleWidthChange={handleWidthChange}
+              handleHeightChange={handleHeightChange}
+              dpi={dpi}
+              setDpi={setDpi}
+              lockAspectRatio={lockAspectRatio}
+              setLockAspectRatio={setLockAspectRatio}
+              outputFormat={outputFormat}
+              setOutputFormat={setOutputFormat}
+              activePreset={activePreset}
+            />
           )}
 
-          {/* Compression & Target File Size (Fully Editable) */}
-          <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                  Target File Size Limit
-                </h3>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                  Set exact maximum file size for government portals or exams
-                </p>
-              </div>
-              <div className="flex flex-col items-end">
-                <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
-                  Current: {currentKb} KB
-                </span>
-                {targetMaxKb && (
-                  <span
-                    className={`text-[10px] font-semibold flex items-center gap-1 ${
-                      targetAchieved
-                        ? 'text-emerald-600 dark:text-emerald-400'
-                        : 'text-amber-600 dark:text-amber-400'
-                    }`}
-                  >
-                    {targetAchieved ? '✓ Within Limit' : '⚠️ Near Limit'}
-                  </span>
-                )}
-              </div>
-            </div>
+          <CompressionCard
+            currentKb={currentKb}
+            targetMaxKb={targetMaxKb}
+            targetAchieved={targetAchieved}
+            setTargetMaxKb={setTargetMaxKb}
+            outputFormat={outputFormat}
+            quality={quality}
+            setQuality={setQuality}
+          />
 
-            {/* Custom Editable Target Size Input */}
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
-                <input
-                  type="number"
-                  step="any"
-                  placeholder="e.g. 50 (Leave blank for Auto)"
-                  value={targetMaxKb ?? ''}
-                  onChange={(e) => {
-                    const raw = e.target.value.trim();
-                    if (raw === '') {
-                      setTargetMaxKb(null);
-                    } else {
-                      const num = parseFloat(raw);
-                      setTargetMaxKb(isNaN(num) || num <= 0 ? null : num);
-                    }
-                  }}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:outline-none"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 dark:text-slate-500">
-                  KB
-                </span>
-              </div>
+          <AdjustmentsCard
+            adjustments={adjustments}
+            setAdjustments={setAdjustments}
+            scanFilter={scanFilter}
+            setScanFilter={setScanFilter}
+            sourceImage={sourceImage}
+            previewDataUrl={previewDataUrl}
+            setViewportMode={setViewportMode}
+            setCropActive={setCropActive}
+            currentKb={currentKb}
+            widthVal={widthVal}
+            heightVal={heightVal}
+            unit={unit}
+            dpi={dpi}
+            targetMaxKb={targetMaxKb}
+            targetAchieved={targetAchieved}
+          />
 
-              {targetMaxKb !== null ? (
-                <button
-                  type="button"
-                  onClick={() => setTargetMaxKb(null)}
-                  className="px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
-                  title="Switch to Auto compression mode"
-                >
-                  Clear (Auto)
-                </button>
-              ) : (
-                <span className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                  Auto Quality
-                </span>
-              )}
-            </div>
-
-            {/* JPEG Quality Slider (Visible when in Auto quality mode without fixed target KB) */}
-            {outputFormat !== 'png' && !targetMaxKb && (
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
-                <div className="flex justify-between text-[11px] text-slate-500 mb-1">
-                  <span>Compression Quality</span>
-                  <span className="font-semibold">{quality}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="20"
-                  max="100"
-                  value={quality}
-                  onChange={(e) => setQuality(parseInt(e.target.value, 10))}
-                  className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-indigo-600"
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Quick Tools & Background Controls */}
-          <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-              Color & Background Enhancement
-            </h3>
-
-            {/* Rotation & Flip */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() =>
-                  setAdjustments((prev) => ({
-                    ...prev,
-                    rotation: (prev.rotation + 90) % 360,
-                  }))
-                }
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800"
-              >
-                <RotateCw className="h-3.5 w-3.5 text-indigo-500" />
-                <span>Rotate 90°</span>
-              </button>
-
-              <button
-                onClick={() =>
-                  setAdjustments((prev) => ({
-                    ...prev,
-                    flipH: !prev.flipH,
-                  }))
-                }
-                className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
-                title="Flip Horizontally"
-              >
-                <FlipHorizontal className="h-4 w-4" />
-              </button>
-            </div>
-
-            {/* Document Scan Mode Filter */}
-            <div>
-              <span className="text-[11px] font-medium text-slate-500 block mb-1.5">
-                Document Scanner Mode
-              </span>
-              <div className="grid grid-cols-3 gap-1.5">
-                {(['original', 'color-enhanced', 'black-and-white'] as const).map((m) => (
-                  <button
-                    key={m}
-                    onClick={() => setScanFilter(m)}
-                    className={`py-1.5 px-2 rounded-lg border text-xs font-semibold capitalize truncate ${
-                      scanFilter === m
-                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300'
-                        : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
-                    }`}
-                  >
-                    {m === 'color-enhanced' ? 'Enhanced' : m === 'black-and-white' ? 'B&W Scan' : 'Normal'}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Live Result Preview Mini-Card */}
-          {sourceImage && previewDataUrl && (
-            <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                  <Eye className="h-3.5 w-3.5 text-indigo-500" />
-                  Live Result Preview
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setViewportMode('result');
-                    setCropActive(false);
-                  }}
-                  className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
-                >
-                  View Large
-                </button>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div
-                  onClick={() => {
-                    setViewportMode('result');
-                    setCropActive(false);
-                  }}
-                  className="w-20 h-24 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 cursor-pointer flex items-center justify-center flex-shrink-0 group hover:ring-2 hover:ring-indigo-500 transition bg-slate-100 dark:bg-slate-800"
-                >
-                  <img
-                    src={previewDataUrl}
-                    alt="Thumbnail Preview"
-                    className="max-w-full max-h-full object-contain group-hover:scale-105 transition"
-                  />
-                </div>
-
-                <div className="flex-1 space-y-1 text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-500 text-[11px]">Size:</span>
-                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
-                      {currentKb} KB
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-500 text-[11px]">Resolution:</span>
-                    <span className="font-mono text-slate-700 dark:text-slate-300 text-[11px]">
-                      {calculatePixels(widthVal, unit, dpi)} × {calculatePixels(heightVal, unit, dpi)} px
-                    </span>
-                  </div>
-                  {targetMaxKb && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-500 text-[11px]">Target Limit:</span>
-                      <span className={`text-[11px] font-bold ${targetAchieved ? 'text-emerald-600' : 'text-amber-500'}`}>
-                        {targetAchieved ? `Pass (≤${targetMaxKb}KB)` : `Over target (${currentKb}KB)`}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Export Action Card */}
-          <div className="p-5 rounded-2xl border border-indigo-200 dark:border-indigo-900 bg-gradient-to-br from-indigo-50/50 to-white dark:from-slate-900 dark:to-slate-900 shadow-md space-y-4">
-            <div>
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                Custom Filename
-              </label>
-              <input
-                type="text"
-                value={customFilename}
-                onChange={(e) => setCustomFilename(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-mono dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-              />
-            </div>
-
-            <div>
-              <button
-                onClick={handleDownload}
-                disabled={!sourceImage}
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-semibold shadow-md shadow-indigo-500/20 disabled:opacity-40 transition"
-              >
-                <Download className="h-4 w-4" />
-                <span>Download Ready Document</span>
-              </button>
-            </div>
-          </div>
+          <ExportActionCard
+            customFilename={customFilename}
+            setCustomFilename={setCustomFilename}
+            handleDownload={handleDownload}
+            sourceImage={sourceImage}
+          />
         </div>
       </div>
     </div>

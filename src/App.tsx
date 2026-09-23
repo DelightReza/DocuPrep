@@ -1,6 +1,7 @@
 import { saveSessionCache, loadSessionCache, clearSessionCache } from './lib/storage/cacheStorage';
 import React, { useState, useEffect } from 'react';
 import { ToolId, PresetRequirement, CustomPreset } from './types';
+import { CheckCircle2 } from 'lucide-react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { MobileNav } from './components/MobileNav';
@@ -14,6 +15,7 @@ import { PdfWorkspace } from './features/pdf-tools/PdfWorkspace';
 import { CustomPresetModal } from './features/custom-preset/CustomPresetModal';
 import { SettingsModal } from './features/settings/SettingsModal';
 import { AboutModal } from './features/about/AboutModal';
+import { ClearCacheModal } from './components/ClearCacheModal';
 
 import { saveCustomPreset } from './config/presets';
 
@@ -43,6 +45,8 @@ export default function App() {
   const [isCustomPresetOpen, setIsCustomPresetOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [isClearConfirmOpen, setIsClearConfirmOpen] = useState(false);
+  const [toastNotice, setToastNotice] = useState<string | null>(null);
   const [pendingEditorImage, setPendingEditorImage] = useState<{
     dataUrl: string;
     filename: string;
@@ -102,11 +106,21 @@ export default function App() {
   };
 
 
-  const handleClearWorkspace = () => {
+  const handleRequestClearWorkspace = () => {
+    setIsClearConfirmOpen(true);
+  };
+
+  const handleConfirmClearWorkspace = () => {
     localStorage.removeItem('docuprep_custom_presets_v1');
     clearSessionCache();
     setPendingEditorImage(null);
     setActiveView('home');
+    setIsClearConfirmOpen(false);
+    setIsSettingsOpen(false);
+    setToastNotice('Workspace cache and history cleared successfully.');
+    setTimeout(() => {
+      setToastNotice(null);
+    }, 3500);
   };
 
   // Save new custom preset
@@ -186,7 +200,7 @@ export default function App() {
       {/* Desktop & Tablet Footer */}
       <Footer
         onSelectTool={(toolId: any) => handleSelectTool(toolId)}
-        onClearWorkspace={handleClearWorkspace}
+        onClearWorkspace={handleRequestClearWorkspace}
         onOpenAbout={() => setIsAboutOpen(true)}
       />
 
@@ -201,8 +215,6 @@ export default function App() {
       />
 
       {/* Modals & Drawers */}
-
-
       <CustomPresetModal
         isOpen={isCustomPresetOpen}
         onClose={() => setIsCustomPresetOpen(false)}
@@ -216,13 +228,31 @@ export default function App() {
         onToggleDarkMode={() => setIsDark(!isDark)}
         editorMode={editorMode}
         onToggleMode={(mode) => setEditorMode(mode)}
-        onClearWorkspace={handleClearWorkspace}
+        onClearWorkspace={handleRequestClearWorkspace}
       />
 
       <AboutModal
         isOpen={isAboutOpen}
         onClose={() => setIsAboutOpen(false)}
       />
+
+      <ClearCacheModal
+        isOpen={isClearConfirmOpen}
+        onClose={() => setIsClearConfirmOpen(false)}
+        onConfirm={handleConfirmClearWorkspace}
+      />
+
+      {/* Floating Success Toast */}
+      {toastNotice && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-[70] flex items-center gap-2.5 rounded-2xl bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-900 px-4 py-3 text-xs font-semibold shadow-2xl backdrop-blur-md border border-slate-700 dark:border-slate-200 animate-fade-in"
+        >
+          <CheckCircle2 className="h-4 w-4 text-emerald-400 dark:text-emerald-600 flex-shrink-0" />
+          <span>{toastNotice}</span>
+        </div>
+      )}
     </div>
   );
 }
